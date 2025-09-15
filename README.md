@@ -37,7 +37,7 @@ This project consists of a full-stack application with the following components:
 
 1. **Build and Start Services**:
    ```bash
-   docker-compose up --build
+   make up
    ```
 
 2. **Access Services**:
@@ -46,7 +46,7 @@ This project consists of a full-stack application with the following components:
 
 3. **Stop Services**:
    ```bash
-   docker-compose down
+   make down
    ```
 
 ## Development Notes
