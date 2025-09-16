@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use App\Repository\FlightRepository;
 use Doctrine\ORM\Mapping as ORM;
+use DateTimeImmutable;
 
 #[ORM\Entity(repositoryClass: FlightRepository::class)]
 class Flight
@@ -25,10 +26,10 @@ class Flight
     private ?string $destination = null;
 
     #[ORM\Column(type: 'datetime_immutable')]
-    private ?\DateTimeImmutable $departureTime = null;
+    private ?DateTimeImmutable $departureTime = null;
 
     #[ORM\Column(type: 'datetime_immutable')]
-    private ?\DateTimeImmutable $arrivalTime = null;
+    private ?DateTimeImmutable $arrivalTime = null;
 
     #[ORM\Column(type: 'integer')]
     private ?int $durationMinutes = null;
@@ -43,11 +44,11 @@ class Flight
     private ?int $seatsAvailable = null;
 
     #[ORM\Column(type: 'datetime_immutable')]
-    private \DateTimeImmutable $createdAt;
+    private DateTimeImmutable $createdAt;
 
     public function __construct()
     {
-        $this->createdAt = new \DateTimeImmutable();
+        $this->createdAt = new DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -91,24 +92,24 @@ class Flight
         return $this;
     }
 
-    public function getDepartureTime(): ?\DateTimeImmutable
+    public function getDepartureTime(): ?DateTimeImmutable
     {
         return $this->departureTime;
     }
 
-    public function setDepartureTime(\DateTimeImmutable $departureTime): self
+    public function setDepartureTime(DateTimeImmutable $departureTime): self
     {
         $this->departureTime = $departureTime;
 
         return $this;
     }
 
-    public function getArrivalTime(): ?\DateTimeImmutable
+    public function getArrivalTime(): ?DateTimeImmutable
     {
         return $this->arrivalTime;
     }
 
-    public function setArrivalTime(\DateTimeImmutable $arrivalTime): self
+    public function setArrivalTime(DateTimeImmutable $arrivalTime): self
     {
         $this->arrivalTime = $arrivalTime;
 
@@ -163,7 +164,7 @@ class Flight
         return $this;
     }
 
-    public function getCreatedAt(): \DateTimeImmutable
+    public function getCreatedAt(): DateTimeImmutable
     {
         return $this->createdAt;
     }

@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use App\Repository\TicketRepository;
 use Doctrine\ORM\Mapping as ORM;
+use DateTimeImmutable;
 
 #[ORM\Entity(repositoryClass: TicketRepository::class)]
 class Ticket
@@ -27,7 +28,7 @@ class Ticket
     private ?string $passengerName = null;
 
     #[ORM\Column(type: 'datetime_immutable')]
-    private ?\DateTimeImmutable $passengerDob = null;
+    private ?DateTimeImmutable $passengerDob = null;
 
     #[ORM\Column(type: 'string')]
     private ?string $seatClass = null;
@@ -39,11 +40,11 @@ class Ticket
     private ?int $priceFinalCents = null;
 
     #[ORM\Column(type: 'datetime_immutable')]
-    private \DateTimeImmutable $createdAt;
+    private DateTimeImmutable $createdAt;
 
     public function __construct()
     {
-        $this->createdAt = new \DateTimeImmutable();
+        $this->createdAt = new DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -87,12 +88,12 @@ class Ticket
         return $this;
     }
 
-    public function getPassengerDob(): ?\DateTimeImmutable
+    public function getPassengerDob(): ?DateTimeImmutable
     {
         return $this->passengerDob;
     }
 
-    public function setPassengerDob(\DateTimeImmutable $passengerDob): self
+    public function setPassengerDob(DateTimeImmutable $passengerDob): self
     {
         $this->passengerDob = $passengerDob;
 
@@ -135,7 +136,7 @@ class Ticket
         return $this;
     }
 
-    public function getCreatedAt(): \DateTimeImmutable
+    public function getCreatedAt(): DateTimeImmutable
     {
         return $this->createdAt;
     }
