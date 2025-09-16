@@ -31,7 +31,7 @@ RUN set -eux; \
 RUN apt-get install -y libpq-dev \
     && docker-php-ext-install -j$(nproc) pdo_pgsql
 
-# COPY ../../composer.* ../../symfony.* ./
+ COPY ../../composer.* ../../symfony.* ./
 
 COPY --link ../../ .
 RUN rm -Rf /srv/backend/docker/
