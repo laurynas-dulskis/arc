@@ -14,4 +14,15 @@ class FlightRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Flight::class);
     }
+
+    /**
+     * @return Flight[]
+     */
+    public function findAllFlights(): array
+    {
+        return $this->createQueryBuilder('f')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 }
