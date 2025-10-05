@@ -1,18 +1,17 @@
-# This file is the entry point to configure your own services.
-# Files in the packages/ subdirectory configure your dependencies.
-
-# Put parameters here that don't need to change on each machine where the app is deployed
-# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    jwt_expiration_in_seconds: 7200
+    jwt_private_key_path: '%kernel.project_dir%/config/packages/%kernel.environment%/jwt/private.key'
+    jwt_public_key_path: '%kernel.project_dir%/config/packages/%kernel.environment%/jwt/public.key'
+    portal_url: '%env(PORTAL_URL)%'
+    google_client_id: '%env(GOOGLE_CLIENT_ID)%'
+    google_redirect_uri: '%env(GOOGLE_REDIRECT_URI)%'
+    google_client_secret: '%env(GOOGLE_CLIENT_SECRET)%'
 
 services:
-    # default configuration for services in *this* file
     _defaults:
-        autowire: true      # Automatically injects dependencies in your services.
-        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        autowire: true
+        autoconfigure: true
 
-    # makes classes in src/ available to be used as services
-    # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
 

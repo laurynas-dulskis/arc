@@ -2,25 +2,15 @@ import React from "react";
 import { API_ENDPOINTS } from "../constants/api";
 
 export function Home() {
+    const [isSigningIn, setIsSigningIn] = React.useState(false);
     const handleGoogleSignIn = async () => {
+        setIsSigningIn(true); // Disable the button
         try {
-            const response = await fetch(API_ENDPOINTS.AUTH.GOOGLE, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Google sign-in successful:', data);
-                // Handle successful sign-in (e.g., redirect, store token, etc.)
-            } else {
-                console.error('Google sign-in failed:', response.statusText);
-            }
+            window.location.href = API_ENDPOINTS.AUTH.GOOGLE;
         } catch (error) {
-            console.error('Error during Google sign-in:', error);
+            console.error('Error during Google sign-in', error);
+        } finally {
+            setIsSigningIn(false);
         }
     };
 
@@ -32,7 +22,10 @@ export function Home() {
                 <div className="w-full max-w-5xl flex justify-end mb-4">
                     <button
                         onClick={handleGoogleSignIn}
-                        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-black"
+                        disabled={isSigningIn}
+                        className={`flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-black ${
+                            isSigningIn ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
                     >
                         <svg className="w-5 h-5" viewBox="0 0 24 24">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

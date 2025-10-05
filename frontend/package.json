@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "react-router build",
-    "start": "react-router dev",
+    "start": "npx react-router dev",
     "dev": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc"
   },

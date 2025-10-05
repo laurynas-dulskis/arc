@@ -14,4 +14,14 @@ class UserRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, User::class);
     }
+
+    public function findByGoogleId(string $googleId): ?User
+    {
+        return $this->createQueryBuilder('user')
+            ->where('user.googleId = :googleId')
+            ->setParameter('googleId', $googleId)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
 }

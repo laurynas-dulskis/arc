@@ -10,6 +10,8 @@ use Doctrine\ORM\Mapping as ORM;
 use DateTimeImmutable;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[ORM\Table(name: '`user`')]
 class User
 {
     #[ORM\Id]
@@ -23,13 +25,13 @@ class User
     #[ORM\Column(type: 'string')]
     private ?string $email = null;
 
-    #[ORM\Column(type: 'string')]
+    #[ORM\Column(type: 'string', nullable: true)]
     private ?string $firstName = null;
 
-    #[ORM\Column(type: 'string')]
+    #[ORM\Column(type: 'string', nullable: true)]
     private ?string $lastName = null;
 
-    #[ORM\Column(type: 'string')]
+    #[ORM\Column(type: 'string', nullable: true)]
     private ?string $phoneNumber = null;
 
     #[ORM\Column(type: 'string', enumType: UserRole::class)]
@@ -132,5 +134,11 @@ class User
     public function getUpdatedAt(): DateTimeImmutable
     {
         return $this->updatedAt;
+    }
+
+    #[ORM\PreUpdate]
+    public function updateTimestamp(): void
+    {
+        $this->updatedAt = new DateTimeImmutable();
     }
 }
