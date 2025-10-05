@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Button from "~/components/button";
 import { showToast } from "~/utils/toastUtils";
-import { logout } from "~/utils/authUtils";
+import {getAccessTokenData, logout} from "~/utils/authUtils";
 import { API_ENDPOINTS } from "~/constants/api";
+import {handleBackendError} from "~/utils/errorUtils";
+import {getUserInfo, updateUserInfo} from "~/clients/usersClient";
 
 export function SignUp() {
     const [formData, setFormData] = useState({
@@ -13,25 +15,103 @@ export function SignUp() {
         phoneNumber: ""
     });
 
+    const [isLoading, setIsLoading] = useState(false);
+    const [isFormValid, setIsFormValid] = useState(false);
+
     useEffect(() => {
-        axios.get(API_ENDPOINTS.USERS.SIGNUP).then(response => {
-            const { email, firstName, lastName } = response.data;
-            setFormData(prev => ({ ...prev, email, firstName, lastName }));
-        }).catch(error => {
-            showToast("Failed to fetch prefilled data", "error");
-            console.error("Failed to fetch prefilled data", error);
-        });
+        const userId = getAccessTokenData(false)?.sub;
+
+        if (!userId) {
+            showToast("User information not found", "error");
+            return;
+        }
+
+        setIsLoading(true);
+        getUserInfo(userId)
+            .then(userData => {
+                const { email, firstName, lastName } = userData;
+                setFormData(prev => ({ ...prev, email, firstName, lastName }));
+            })
+            .catch(() => {
+                // Error already handled in getUserInfo
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
     }, []);
+
+    useEffect(() => {
+        const { email, firstName, lastName, phoneNumber } = formData;
+        setIsFormValid(
+            email.trim() !== "" &&
+            firstName.trim() !== "" &&
+            lastName.trim() !== "" &&
+            phoneNumber.trim() !== ""
+        );
+    }, [formData]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
         console.log("Form submitted", formData);
-        // Add form submission logic here
+
+        const errors: Record<string, string> = {};
+
+        if (!formData.email.trim()) {
+            errors.email = "Email cannot be empty";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            errors.email = "Please enter a valid email address";
+        }
+
+        if (!formData.firstName.trim()) {
+            errors.firstName = "First name cannot be empty";
+        } else if (formData.firstName.length < 3 || formData.firstName.length > 30) {
+            errors.firstName = "First name must be between 3 and 30 characters";
+        }
+
+        if (!formData.lastName.trim()) {
+            errors.lastName = "Last name cannot be empty";
+        } else if (formData.lastName.length < 3 || formData.lastName.length > 30) {
+            errors.lastName = "Last name must be between 3 and 30 characters";
+        }
+
+        if (!formData.phoneNumber.trim()) {
+            errors.phoneNumber = "Phone number cannot be empty";
+        } else if (!/^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,10}[-\s.]?[0-9]{1,10}$/.test(formData.phoneNumber)) {
+            errors.phoneNumber = "Please enter a valid phone number";
+        }
+
+        if (Object.keys(errors).length > 0) {
+            for (const [field, message] of Object.entries(errors)) {
+                showToast(message, "error");
+            }
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+            const userId = getAccessTokenData(false)?.sub;
+
+            if (!userId) {
+                showToast("User information not found", "error");
+                return;
+            }
+
+            await updateUserInfo(userId, formData);
+
+            showToast("Your profile has been updated successfully", "success");
+
+            window.location.href = API_ENDPOINTS.AUTH.GOOGLE;
+        } catch (error) {
+            handleBackendError(error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -92,18 +172,16 @@ export function SignUp() {
                 </div>
                 <div className="flex items-center justify-between">
                     <Button
-                            text="Logout"
-                            color="bg-red-600"
-                            onClick={
-                                logout
-                            }
+                        text="Logout"
+                        color="bg-red-600"
+                        onClick={logout}
                     />
                     <Button
                         text="Sign up"
                         color="bg-blue-600"
-                        onClick={() => {
-                            showToast("Signing up...", "info");
-                        }}
+                        type="submit"
+                        onClick={() => {}}
+                        disabled={isLoading || !isFormValid}
                     />
                 </div>
             </form>

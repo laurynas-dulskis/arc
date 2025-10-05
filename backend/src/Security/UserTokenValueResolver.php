@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace App\Security;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
 
-class UserTokenValueResolver
+class UserTokenValueResolver implements ValueResolverInterface
 {
     public function __construct(
         private readonly JwtUserTokenExtractor $jwtUserTokenExtractor,

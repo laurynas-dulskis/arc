@@ -2,15 +2,15 @@ import React from "react";
 import FlightCard from "../components/flightCard";
 import SignInButton from "../components/signInButton";
 import Button from "../components/button";
-import { 
-    getAccessTokenData, 
+import {
+    getAccessTokenData,
     logout,
-    isAdmin, 
-    signInWithGoogle 
+    isAdmin,
+    signInWithGoogle
 } from "../utils/authUtils";
-import { showToast } from "../utils/toastUtils";
-import { getAllFlights } from "~/clients/flightsClient";
-import { ROUTES } from "~/constants/routes";
+import {showToast} from "../utils/toastUtils";
+import {getAllFlights} from "~/clients/flightsClient";
+import {ROUTES} from "~/constants/routes";
 
 interface Flight {
     flightNumber: string;
@@ -30,7 +30,7 @@ export function Home() {
 
     const handleGoogleSignIn = async () => {
         setIsSigningIn(true);
-        
+
         try {
             signInWithGoogle();
         } catch (error) {
@@ -78,25 +78,23 @@ export function Home() {
                                     {getAccessTokenData()?.name} {getAccessTokenData()?.surname}
                                 </span>
                             </div>
-                            <div className="flex justify-end">
+                            <div className="flex justify-end ml-4">
+                                {isAdmin() ? (
+                                    <Button
+                                        text="Admin Panel"
+                                        color="bg-blue-600 ml-4"
+                                        onClick={() => (window.location.href = ROUTES.ADMIN_PANEL)}
+                                    />
+                                ) : null}
                                 <Button
                                     text="Logout"
                                     color="bg-red-600 ml-4"
                                     onClick={logout}
                                 />
                             </div>
-                            {isAdmin() ? (
-                                <div className="flex justify-end mt-5">
-                                    <Button
-                                        text="Admin Panel"
-                                        color="bg-blue-600 ml-4"
-                                        onClick={() => (window.location.href = ROUTES.ADMIN_PANEL)}
-                                    />
-                                </div>
-                            ) : null}
                         </div>
                     ) : (
-                        <SignInButton isSigningIn={isSigningIn} onClick={handleGoogleSignIn} />
+                        <SignInButton isSigningIn={isSigningIn} onClick={handleGoogleSignIn}/>
                     )}
                 </div>
 
@@ -109,7 +107,6 @@ export function Home() {
                             type="text"
                             placeholder="From"
                             className="flex-1 px-3 py-2 border rounded-md bg-white text-gray-700"
-                            defaultValue="Vilnius"
                         />
                         <input
                             type="text"

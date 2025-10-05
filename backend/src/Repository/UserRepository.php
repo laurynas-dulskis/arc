@@ -17,9 +17,19 @@ class UserRepository extends ServiceEntityRepository
 
     public function findByGoogleId(string $googleId): ?User
     {
-        return $this->createQueryBuilder('user')
-            ->where('user.googleId = :googleId')
+        return $this->createQueryBuilder('u')
+            ->where('u.googleId = :googleId')
             ->setParameter('googleId', $googleId)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
+
+    public function findById(int $id): ?User
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.id = :id')
+            ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult()
         ;

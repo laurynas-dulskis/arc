@@ -19,7 +19,7 @@ export interface AccessToken {
     exp: number;
 }
 
-export function getAccessTokenData(): AccessToken | null {
+export function getAccessTokenData(redirect = true): AccessToken | null {
     const token = Cookies.get('access_token');
 
     if (!token) {
@@ -38,7 +38,7 @@ export function getAccessTokenData(): AccessToken | null {
 
         const parsedData = JSON.parse(jsonPayload);
 
-        if (parsedData.signUpCompleted !== true) {
+        if (!parsedData.signupCompleted && redirect) {
             window.location.href = ROUTES.COMPLETE_SIGNUP;
 
             return null;
@@ -61,4 +61,16 @@ export function logout() {
 
 export function isAdmin(): boolean {
     return getAccessTokenData()?.role === UserRoles.ADMIN;
+}
+
+export function ensureAdminAccess(): boolean {
+    if (!isAdmin()) {
+        showToast("Access denied. Admins only.", "error");
+
+        window.location.href = ROUTES.HOME;
+
+        return false;
+    }
+
+    return true;
 }
