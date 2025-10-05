@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\User;
 
-use App\Dto\Flight\FlightUpdateRequest;
 use App\Dto\User\UserSignupDetailsRequest;
-use App\Entity\Flight;
 use App\Exception\EntityNotFoundException;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;

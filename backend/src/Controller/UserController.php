@@ -20,7 +20,7 @@ class UserController
     public function __construct(
         private readonly UserQueryService $userQueryService,
         private readonly UserComandService $userComandService,
-        private readonly AccessValidator $accessValidator
+        private readonly AccessValidator $accessValidator,
     ) {
     }
 

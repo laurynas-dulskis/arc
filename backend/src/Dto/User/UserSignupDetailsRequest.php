@@ -16,8 +16,8 @@ class UserSignupDetailsRequest
     #[Assert\Length(
         min: 3,
         max: 30,
-        minMessage: "First name must be at least {{ limit }} characters long",
-        maxMessage: "First name cannot be longer than {{ limit }} characters"
+        minMessage: 'First name must be at least {{ limit }} characters long',
+        maxMessage: 'First name cannot be longer than {{ limit }} characters'
     )]
     public ?string $firstName = null;
 
@@ -25,8 +25,8 @@ class UserSignupDetailsRequest
     #[Assert\Length(
         min: 3,
         max: 30,
-        minMessage: "Last name must be at least {{ limit }} characters long",
-        maxMessage: "Last name cannot be longer than {{ limit }} characters"
+        minMessage: 'Last name must be at least {{ limit }} characters long',
+        maxMessage: 'Last name cannot be longer than {{ limit }} characters'
     )]
     public ?string $lastName = null;
 

@@ -32,7 +32,7 @@ class AccessValidator
 
     public function validateIsAdmin(UserToken $token): void
     {
-        if ($token->role !== UserRole::Admin) {
+        if (UserRole::Admin !== $token->role) {
             throw new UnauthorizedHttpException('Bearer', 'Access denied');
         }
     }
