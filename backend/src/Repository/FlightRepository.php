@@ -15,6 +15,11 @@ class FlightRepository extends ServiceEntityRepository
         parent::__construct($registry, Flight::class);
     }
 
+    public function findById(int $id): ?Flight
+    {
+        return $this->find($id);
+    }
+
     /**
      * @return Flight[]
      */

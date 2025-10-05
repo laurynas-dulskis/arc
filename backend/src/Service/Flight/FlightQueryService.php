@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\Flight;
 
+use App\Exception\EntityNotFoundException;
 use App\Normalizer\FlightNormalizer;
 use App\Repository\FlightRepository;
 
@@ -13,6 +14,17 @@ class FlightQueryService
         private readonly FlightRepository $flightRepository,
         private readonly FlightNormalizer $flightNormalizer,
     ) {
+    }
+
+    public function getOne(int $id): array
+    {
+        $flight = $this->flightRepository->findById($id);
+
+        if (null === $flight) {
+            throw new EntityNotFoundException('Flight not found', ['id' => $id]);
+        }
+
+        return $this->flightNormalizer->normalize($flight);
     }
 
     public function getAll(): array

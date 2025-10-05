@@ -15,10 +15,10 @@ class FlightNormalizer
             'flightNumber' => $flight->getFlightNumber(),
             'origin' => $flight->getOrigin(),
             'destination' => $flight->getDestination(),
-            'departureTime' => $flight->getDepartureTime()->format('Y-m-d'),
-            'arrivalTime' => $flight->getArrivalTime()->format('Y-m-d'),
+            'departureTime' => $flight->getDepartureTime()->format('Y-m-d h:i:s'),
+            'arrivalTime' => $flight->getArrivalTime()->format('Y-m-d h:i:s'),
             'durationMinutes' => $flight->getDurationMinutes(),
-            'basePricePerCents' => $flight->getBasePriceCents(),
+            'basePriceCents' => $flight->getBasePriceCents(),
             'seatsTotal' => $flight->getSeatsTotal(),
             'seatsAvailable' => $flight->getSeatsAvailable(),
         ];
