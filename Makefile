@@ -4,6 +4,9 @@ up:
 up-build:
 	@docker compose up --build -d --remove-orphans
 
+up-build-react:
+	@docker compose up --build -d --remove-orphans frontend-react
+
 down:
 	@docker compose down
 
