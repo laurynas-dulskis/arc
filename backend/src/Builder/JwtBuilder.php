@@ -16,6 +16,7 @@ class JwtBuilder
     private ?string $userName = null;
     private ?string $userSurname = null;
     private ?UserRole $userRole = null;
+    private ?bool $signupCompleted = null;
 
     public function __construct(
         private readonly PrivateKeyService $privateKeyService,
@@ -61,6 +62,13 @@ class JwtBuilder
         return $this;
     }
 
+    public function setSignupCompleted(bool $signupCompleted): self
+    {
+        $this->signupCompleted = $signupCompleted;
+
+        return $this;
+    }
+
     public function build(): string
     {
         if (
@@ -69,6 +77,7 @@ class JwtBuilder
             || null === $this->userRole
             || null === $this->userName
             || null === $this->userSurname
+            || null === $this->signupCompleted
         ) {
             throw new RuntimeException('User info must be set before building the JWT');
         }
@@ -87,6 +96,7 @@ class JwtBuilder
                 'name' => $this->userName,
                 'surname' => $this->userSurname,
                 'role' => $this->userRole->value,
+                'signupCompleted' => $this->signupCompleted,
                 'iat' => time(),
                 'exp' => time() + $this->jwtExpirationInSeconds,
             ]

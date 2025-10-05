@@ -4,12 +4,13 @@ import SignInButton from "../components/signInButton";
 import Button from "../components/button";
 import { 
     getAccessTokenData, 
-    clearAccessToken,
+    logout,
     isAdmin, 
     signInWithGoogle 
 } from "../utils/authUtils";
 import { showToast } from "../utils/toastUtils";
 import { getAllFlights } from "~/clients/flightsClient";
+import { ROUTES } from "~/constants/routes";
 
 interface Flight {
     flightNumber: string;
@@ -29,6 +30,7 @@ export function Home() {
 
     const handleGoogleSignIn = async () => {
         setIsSigningIn(true);
+        
         try {
             signInWithGoogle();
         } catch (error) {
@@ -80,7 +82,7 @@ export function Home() {
                                 <Button
                                     text="Logout"
                                     color="bg-red-600 ml-4"
-                                    onClick={clearAccessToken}
+                                    onClick={logout}
                                 />
                             </div>
                             {isAdmin() ? (
@@ -88,7 +90,7 @@ export function Home() {
                                     <Button
                                         text="Admin Panel"
                                         color="bg-blue-600 ml-4"
-                                        onClick={() => (window.location.href = "/admin")}
+                                        onClick={() => (window.location.href = ROUTES.ADMIN_PANEL)}
                                     />
                                 </div>
                             ) : null}

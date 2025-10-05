@@ -22,6 +22,7 @@ class JwtService
             ->setName($user->getFirstName())
             ->setSurname($user->getLastName())
             ->setRole($user->getRole())
+            ->setSignupCompleted($user->isSignupCompleted())
             ->build()
         ;
     }

@@ -1,4 +1,5 @@
 parameters:
+    jwt_algorithm: 'RS256'
     jwt_expiration_in_seconds: 7200
     jwt_private_key_path: '%kernel.project_dir%/config/packages/%kernel.environment%/jwt/private.key'
     jwt_public_key_path: '%kernel.project_dir%/config/packages/%kernel.environment%/jwt/public.key'
@@ -18,3 +19,15 @@ services:
     App\Controller\:
         resource: '../src/Controller/'
         public: true
+
+    App\Security\UserTokenValueResolver:
+        tags:
+            - { name: controller.argument_value_resolver }
+
+    App\EventListener\ExceptionListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception, method: onKernelException }
+
+    App\EventListener\RequestListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }

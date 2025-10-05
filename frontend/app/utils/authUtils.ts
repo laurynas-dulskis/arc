@@ -1,12 +1,25 @@
 import Cookies from 'js-cookie';
 import { UserRoles } from '../constants/userRoles';
 import { API_ENDPOINTS } from '~/constants/api';
+import { showToast } from './toastUtils';
+import { ROUTES } from '~/constants/routes';
 
 export function signInWithGoogle() {
     window.location.href = API_ENDPOINTS.AUTH.GOOGLE;
 } 
 
-export function getAccessTokenData(): any | null {
+export interface AccessToken {
+    sub: string;
+    email: string;
+    name: string;
+    surname: string;
+    role: string;
+    signupCompleted: boolean;
+    iat: number;
+    exp: number;
+}
+
+export function getAccessTokenData(): AccessToken | null {
     const token = Cookies.get('access_token');
 
     if (!token) {
@@ -23,17 +36,27 @@ export function getAccessTokenData(): any | null {
                 .join('')
         );
 
-        return JSON.parse(jsonPayload);
+        const parsedData = JSON.parse(jsonPayload);
+
+        if (parsedData.signUpCompleted !== true) {
+            window.location.href = ROUTES.COMPLETE_SIGNUP;
+
+            return null;
+        }
+
+        return parsedData as AccessToken;
     } catch (error) {
         console.error('Failed to parse access token:', error);
+        showToast("Failed to retrieve user information", "error");
+
         return null;
     }
 }
 
-export function clearAccessToken() {
+export function logout() {
     Cookies.remove('access_token');
 
-    window.location.reload();
+    window.location.href = ROUTES.HOME;
 }
 
 export function isAdmin(): boolean {

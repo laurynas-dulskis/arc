@@ -34,6 +34,9 @@ class User
     #[ORM\Column(type: 'string', nullable: true)]
     private ?string $phoneNumber = null;
 
+    #[ORM\Column(type: 'boolean')]
+    private bool $signupCompleted = false;
+
     #[ORM\Column(type: 'string', enumType: UserRole::class)]
     private UserRole $role;
 
@@ -134,6 +137,18 @@ class User
     public function getUpdatedAt(): DateTimeImmutable
     {
         return $this->updatedAt;
+    }
+
+    public function isSignupCompleted(): bool
+    {
+        return $this->signupCompleted;
+    }
+
+    public function setSignupCompleted(bool $signupCompleted): self
+    {
+        $this->signupCompleted = $signupCompleted;
+
+        return $this;
     }
 
     #[ORM\PreUpdate]

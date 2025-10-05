@@ -7,6 +7,10 @@ framework:
 
     #esi: true
     #fragments: true
+    serializer:
+        enabled: true
+        default_context:
+            json_encode_options: JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
 
 when@test:
     framework:
