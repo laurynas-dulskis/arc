@@ -8,6 +8,7 @@ interface ConfirmationModalProps {
     onCancel: () => void;
     title: string;
     message: string;
+    isLoading?: boolean;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onConfirm, onCancel, title, message, isLoading }) => {

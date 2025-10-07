@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { API_ENDPOINTS } from '~/constants/api';
+import { handleBackendError } from '~/utils/errorUtils';
 import { showToast } from '~/utils/toastUtils';
 
 export const getAllFlights = async (params?: { from?: string; to?: string; startDate?: string; endDate?: string }) => {
@@ -18,7 +19,49 @@ export const getAllFlights = async (params?: { from?: string; to?: string; start
 
         return response.data;
     } catch (error) {
-        showToast('Error fetching flights', 'error');
+        handleBackendError(error);
+
+        throw error;
+    }
+};
+
+export const adminUpdateFlight = async (flightId: string, flightData: any) => {
+    try {
+        const response = await axios.put(`${API_ENDPOINTS.FLIGHTS.ALL}/${flightId}`, flightData, {
+            withCredentials: true
+        });
+
+        return response.data;
+    } catch (error) {
+        handleBackendError(error);
+
+        throw error;
+    }
+};
+
+export const adminDeleteFlight = async (flightId: string) => {
+    try {
+        const response = await axios.delete(`${API_ENDPOINTS.FLIGHTS.ALL}/${flightId}`, {
+            withCredentials: true
+        });
+
+        return response.data;
+    } catch (error) {
+        handleBackendError(error);
+
+        throw error;
+    }
+};
+
+export const adminCreateFlight = async (flightData: any) => {
+    try {
+        const response = await axios.post(API_ENDPOINTS.FLIGHTS.ALL, flightData, {
+            withCredentials: true
+        });
+
+        return response.data;
+    } catch (error) {
+        handleBackendError(error);
 
         throw error;
     }

@@ -37,12 +37,12 @@ export function Home() {
             .then((data: Flight[]) => {
                 const formattedFlights = data.map((flight) => ({
                     ...flight,
-                    departureTime: new Date(flight.departureTime.replace(' ', 'T')).toLocaleString('en-US', {
+                    departureTime: new Date(flight.departureTime.replace(' ', 'T')).toLocaleString('en-LT', {
                         year: 'numeric',
                         month: 'short',
                         day: '2-digit',
                     }),
-                    arrivalTime: new Date(flight.arrivalTime.replace(' ', 'T')).toLocaleString('en-US', {
+                    arrivalTime: new Date(flight.arrivalTime.replace(' ', 'T')).toLocaleString('en-LT', {
                         year: 'numeric',
                         month: 'short',
                         day: '2-digit',

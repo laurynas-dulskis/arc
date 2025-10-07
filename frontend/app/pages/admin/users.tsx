@@ -142,7 +142,7 @@ export function Users() {
     return (
         <div className="flex flex-col items-center bg-gray-50 min-h-screen pt-8 pb-6">
             <AdminNavigationHeader/>
-            <h1 className="text-4xl font-bold text-gray-700 mb-10">Admin Users Panel</h1>
+            {isAdmin ?  <h1 className="text-4xl font-bold text-gray-800 pb-10">Admin Users Panel</h1> : null}
 
             {loading ? (
                 <Spinner/>
