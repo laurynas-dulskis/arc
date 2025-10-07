@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Dto\Flight\FlightFilterRequest;
 use App\Entity\Flight;
+use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -23,11 +25,40 @@ class FlightRepository extends ServiceEntityRepository
     /**
      * @return Flight[]
      */
-    public function findAllFlights(): array
+    public function findAllFlights(FlightFilterRequest $request): array
     {
-        return $this->createQueryBuilder('f')
+        $queryBuilder = $this->createQueryBuilder('f');
+
+        if (null !== $request->from) {
+            $queryBuilder->andWhere('f.origin = :origin')
+                ->setParameter('origin', $request->from)
+            ;
+        }
+
+        if (null !== $request->to) {
+            $queryBuilder->andWhere('f.destination = :destination')
+                ->setParameter('destination', $request->to)
+            ;
+        }
+
+        if (null !== $request->dateFrom) {
+            $queryBuilder->andWhere('f.departureTime >= :dateFrom')
+                ->setParameter('dateFrom', $request->dateFrom)
+            ;
+        }
+
+        if (null !== $request->dateTo) {
+            $queryBuilder->andWhere('f.arrivalTime <= :dateTo')
+                ->setParameter('dateTo', $request->dateTo)
+            ;
+        }
+
+        return $queryBuilder
+            ->andWhere('f.departureTime > :now')
+            ->setParameter('now', new DateTimeImmutable())
+            ->addOrderBy('f.departureTime', 'ASC')
             ->getQuery()
             ->getResult()
-        ;
+            ;
     }
 }

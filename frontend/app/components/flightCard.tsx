@@ -5,7 +5,6 @@ interface FlightCardProps {
     dates: string;
     price: string;
     duration: string;
-    seatsInfo: string;
     seatsAvailable: number;
     seatsTotal: number;
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\Flight;
 
+use App\Dto\Flight\FlightFilterRequest;
 use App\Exception\EntityNotFoundException;
 use App\Normalizer\FlightNormalizer;
 use App\Repository\FlightRepository;
@@ -27,10 +28,10 @@ class FlightQueryService
         return $this->flightNormalizer->normalize($flight);
     }
 
-    public function getAll(): array
+    public function getAll(FlightFilterRequest $request): array
     {
         $flights = [];
-        foreach ($this->flightRepository->findAllFlights() as $flight) {
+        foreach ($this->flightRepository->findAllFlights($request) as $flight) {
             $flights[] = $this->flightNormalizer->normalize($flight);
         }
 

@@ -10,7 +10,7 @@ export function Flights() {
 
     return (
         <div>
-            {isAdmin ? <h1>Admin Flights Panel</h1> : null}
+            {isAdmin ? <h1>Admin Reservation Panel</h1> : null}
             {/* Admin panel content goes here */}
         </div>
     );

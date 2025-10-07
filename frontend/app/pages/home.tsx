@@ -1,32 +1,22 @@
 import React from "react";
-import FlightCard from "../components/flightCard";
-import SignInButton from "../components/signInButton";
-import Button from "../components/button";
-import {
-    getAccessTokenData,
-    logout,
-    isAdmin,
-    signInWithGoogle
-} from "../utils/authUtils";
+import HeroSection from "../components/heroSection";
+import SearchCard from "../components/searchCard";
+import FlightsList from "../components/flightsList";
+import { signInWithGoogle } from "../utils/authUtils";
 import {showToast} from "../utils/toastUtils";
 import {getAllFlights} from "~/clients/flightsClient";
-import {ROUTES} from "~/constants/routes";
-
-interface Flight {
-    flightNumber: string;
-    origin: string;
-    destination: string;
-    departureTime: string;
-    arrivalTime: string;
-    durationMinutes: number;
-    basePriceCents: number;
-    seatsTotal: number;
-    seatsAvailable: number;
-}
+import type { Flight } from "~/model/flight";
 
 export function Home() {
     const [isSigningIn, setIsSigningIn] = React.useState(false);
+    const [isFetchingFlights, setIsFetchingFlights] = React.useState(false);
     const [flights, setFlights] = React.useState<Flight[]>([]);
+    const [searchParams, setSearchParams] = React.useState({
+        from: '',
+        to: '',
+        dateFrom: '',
+        dateTo: '',
+    });
 
     const handleGoogleSignIn = async () => {
         setIsSigningIn(true);
@@ -40,120 +30,54 @@ export function Home() {
         }
     };
 
-    React.useEffect(() => {
-        getAllFlights()
+    const handleSearch = () => {
+        setIsFetchingFlights(true);
+
+        getAllFlights(searchParams)
             .then((data: Flight[]) => {
                 const formattedFlights = data.map((flight) => ({
                     ...flight,
-                    departureTime: new Date(flight.departureTime).toLocaleString('en-US', {
+                    departureTime: new Date(flight.departureTime.replace(' ', 'T')).toLocaleString('en-US', {
                         year: 'numeric',
                         month: 'short',
                         day: '2-digit',
                     }),
-                    arrivalTime: new Date(flight.arrivalTime).toLocaleString('en-US', {
+                    arrivalTime: new Date(flight.arrivalTime.replace(' ', 'T')).toLocaleString('en-US', {
                         year: 'numeric',
                         month: 'short',
                         day: '2-digit',
                     }),
                 }));
 
+                if (formattedFlights.length === 0) {
+                    showToast("No flights found", "info");
+                }
+
                 setFlights(formattedFlights);
             })
             .catch((err) => {
                 console.error(err);
                 showToast("Failed to fetch flights", "error");
+            })
+            .finally(() => {
+                setIsFetchingFlights(false);
             });
+    };
+
+    React.useEffect(() => {
+        handleSearch();
     }, []);
 
     return (
         <main className="flex flex-col items-center bg-gray-50 min-h-screen pt-12 pb-6">
-            {/* Hero Section */}
-            <header className="flex flex-col items-center w-full px-6">
-                <div className="w-full max-w-5xl flex justify-end mb-4">
-                    {getAccessTokenData() !== null ? (
-                        <div>
-                            <div className="mb-4 text-gray-700">
-                                <span className="italic">Logged in as:</span>{" "}
-                                <span className="font-semibold">
-                                    {getAccessTokenData()?.name} {getAccessTokenData()?.surname}
-                                </span>
-                            </div>
-                            <div className="flex justify-end ml-4">
-                                {isAdmin() ? (
-                                    <Button
-                                        text="Admin Panel"
-                                        color="bg-blue-600 ml-4"
-                                        onClick={() => (window.location.href = ROUTES.ADMIN_PANEL)}
-                                    />
-                                ) : null}
-                                <Button
-                                    text="Logout"
-                                    color="bg-red-600 ml-4"
-                                    onClick={logout}
-                                />
-                            </div>
-                        </div>
-                    ) : (
-                        <SignInButton isSigningIn={isSigningIn} onClick={handleGoogleSignIn}/>
-                    )}
-                </div>
-
-                <h1 className="text-4xl font-bold text-gray-800">Flights</h1>
-
-                {/* Search Box */}
-                <div className="mt-6 w-full max-w-5xl bg-white rounded-xl shadow border border-gray-200 p-4">
-                    <div className="flex flex-wrap gap-3 justify-between">
-                        <input
-                            type="text"
-                            placeholder="From"
-                            className="flex-1 px-3 py-2 border rounded-md bg-white text-gray-700"
-                        />
-                        <input
-                            type="text"
-                            placeholder="Where to?"
-                            className="flex-1 px-3 py-2 border rounded-md bg-white text-gray-700"
-                        />
-
-                        <input
-                            type="date"
-                            className="px-3 py-2 border rounded-md bg-white text-gray-700"
-                        />
-                        <input
-                            type="date"
-                            className="px-3 py-2 border rounded-md bg-white text-gray-700"
-                        />
-
-                        <Button
-                            text="Search"
-                            color="bg-blue-600"
-                            onClick={() => {
-                                showToast("Exploring flights...", "info");
-                            }}
-                        />
-                    </div>
-                </div>
-            </header>
-
-            {/* Results Section */}
-            <section className="flex flex-col items-start w-full max-w-5xl mt-10 px-6">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                    Available Flights
-                </h2>
-
-                <div className="grid md:grid-cols-3 gap-4 w-full">
-                    {flights.map((flight) => (
-                        <FlightCard
-                            key={flight.flightNumber}
-                            route={`${flight.origin} to ${flight.destination}`}
-                            dates={`${flight.departureTime} – ${flight.arrivalTime}`}
-                            price={`€${(flight.basePriceCents / 100).toFixed(2)}`}
-                            duration={`Flight duration: ${(flight.durationMinutes / 60).toFixed(1)} hours`}
-                            seatsAvailable={flight.seatsAvailable}
-                            seatsTotal={flight.seatsTotal}
-                        />
-                    ))}
-                </div>
-            </section>
+            <HeroSection isSigningIn={isSigningIn} handleGoogleSignIn={handleGoogleSignIn} />
+            <SearchCard
+                searchParams={searchParams}
+                setSearchParams={setSearchParams}
+                handleSearch={handleSearch}
+                isFetchingFlights={isFetchingFlights}
+            />
+            <FlightsList flights={flights} isFetchingFlights={isFetchingFlights} />
         </main>
     );
 }
