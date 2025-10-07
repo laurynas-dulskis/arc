@@ -42,7 +42,7 @@ class FlightController
     #[Route(name: 'flight_create', methods: ['POST'])]
     public function create(
         #[MapRequestPayload] FlightCreateRequest $request,
-        UserToken $userToken
+        UserToken $userToken,
     ): JsonResponse {
         $this->accessValidator->validateIsAdmin($userToken);
 
@@ -58,7 +58,7 @@ class FlightController
     public function update(
         #[MapRequestPayload] FlightUpdateRequest $request,
         Flight $flight,
-        UserToken $userToken
+        UserToken $userToken,
     ): JsonResponse {
         $this->accessValidator->validateIsAdmin($userToken);
 

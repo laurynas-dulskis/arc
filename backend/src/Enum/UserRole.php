@@ -8,6 +8,7 @@ enum UserRole: string
 {
     case User = 'User';
     case Admin = 'Admin';
+    case Disabled = 'Disabled';
 
     public static function values(): array
     {

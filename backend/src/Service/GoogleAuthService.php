@@ -78,6 +78,10 @@ class GoogleAuthService
             $this->entityManager->flush();
         }
 
+        if (UserRole::Disabled === $user->getRole()) {
+            throw new UnauthorizedHttpException('User account is disabled');
+        }
+
         $jwtToken = $this->jwtService->createAccessToken($user);
 
         return new Cookie(

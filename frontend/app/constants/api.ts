@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
     ALL: `${API_BASE_URL}/flights`,
   },
   USERS: {
+    ALL: `${API_BASE_URL}/users`,
     SIGNUP: `${API_BASE_URL}/users/signup`,
   }
 } as const;

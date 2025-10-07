@@ -182,9 +182,7 @@ class ExceptionListener
 
                 $event->setResponse(
                     new JsonResponse([
-                        'error' => 'Internal Server Error',
-                        'error_message' => $exception->getMessage(),
-                        'trace' => $exception->getTraceAsString(),
+                        'error' => $exception->getMessage(),
                     ], Response::HTTP_INTERNAL_SERVER_ERROR)
                 );
 

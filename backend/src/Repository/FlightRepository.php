@@ -59,6 +59,6 @@ class FlightRepository extends ServiceEntityRepository
             ->addOrderBy('f.departureTime', 'ASC')
             ->getQuery()
             ->getResult()
-            ;
+        ;
     }
 }

@@ -8,6 +8,7 @@ use App\Enum\UserRole;
 use App\Exception\EntityNotFoundException;
 use App\Repository\UserRepository;
 use App\Security\UserToken;
+use Exception;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class AccessValidator
@@ -27,6 +28,19 @@ class AccessValidator
 
         if ($token->id !== $userId) {
             throw new UnauthorizedHttpException('Bearer', 'Access denied');
+        }
+    }
+
+    public function validateTokenDoesNotBelongsToUserId(UserToken $token, int $userId): void
+    {
+        $user = $this->userRepository->findById($userId);
+
+        if (null === $user) {
+            throw new EntityNotFoundException('User not found', ['id' => $userId]);
+        }
+
+        if ($token->id === $userId) {
+            throw new Exception('Users cannot perform this action on themselves');
         }
     }
 

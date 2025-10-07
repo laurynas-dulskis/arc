@@ -11,6 +11,7 @@ use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\HttpFoundation\Response;
 use App\Service\GoogleAuthService;
 use App\Dto\GoogleCallbackRequest;
+use Throwable;
 
 #[Route('/auth')]
 class AuthController
@@ -34,14 +35,18 @@ class AuthController
             validationFailedStatusCode: Response::HTTP_BAD_REQUEST
         )] GoogleCallbackRequest $googleCallbackRequest,
     ): JsonRedirectResponse {
-        $accessTokenCookie = $this->googleAuthService->authenticate(
-            $googleCallbackRequest->code,
-            $googleCallbackRequest->state
-        );
+        try {
+            $accessTokenCookie = $this->googleAuthService->authenticate(
+                $googleCallbackRequest->code,
+                $googleCallbackRequest->state
+            );
 
-        $response = new JsonRedirectResponse($this->portalUrl);
-        $response->headers->setCookie($accessTokenCookie);
+            $response = new JsonRedirectResponse($this->portalUrl);
+            $response->headers->setCookie($accessTokenCookie);
 
-        return $response;
+            return $response;
+        } catch (Throwable $e) {
+            return new JsonRedirectResponse($this->portalUrl);
+        }
     }
 }

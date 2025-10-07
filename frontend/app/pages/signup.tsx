@@ -115,7 +115,7 @@ export function SignUp() {
 
     return (
         <div className="flex flex-col items-center bg-gray-50 min-h-screen py-12">
-            <h1 className="text-2xl font-bold mb-6">Sign Up</h1>
+            <h1 className="text-2xl font-bold mb-6 text-gray-700">Sign Up</h1>
             <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md">
                 <div className="mb-4">
                     <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">

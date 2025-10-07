@@ -57,7 +57,6 @@ export function Home() {
             })
             .catch((err) => {
                 console.error(err);
-                showToast("Failed to fetch flights", "error");
             })
             .finally(() => {
                 setIsFetchingFlights(false);

@@ -7,9 +7,11 @@ export const getUserInfo = async (userId: string) => {
         const response = await axios.get(`${API_ENDPOINTS.USERS.SIGNUP}/${userId}`, {
             withCredentials: true
         });
+
         return response.data;
     } catch (error) {
         handleBackendError(error);
+
         throw error;
     }
 };
@@ -19,9 +21,53 @@ export const updateUserInfo = async (userId: string, userData: any) => {
         const response = await axios.put(`${API_ENDPOINTS.USERS.SIGNUP}/${userId}`, userData, {
             withCredentials: true
         });
+
         return response.data;
     } catch (error) {
         handleBackendError(error);
+
+        throw error;
+    }
+};
+
+export const adminGetAllUsers = async () => {
+    try {
+        const response = await axios.get(API_ENDPOINTS.USERS.ALL, {
+            withCredentials: true
+        });
+
+        return response.data;
+    } catch (error) {
+        handleBackendError(error);
+
+        throw error;
+    }
+};
+
+export const adminUpdateUser = async (userId: string, userData: any) => {
+    try {
+        const response = await axios.put(`${API_ENDPOINTS.USERS.ALL}/${userId}`, userData, {
+            withCredentials: true
+        });
+
+        return response.data;
+    } catch (error) {
+        handleBackendError(error);
+
+        throw error;
+    }
+};
+
+export const adminDeleteUser = async (userId: string) => {
+    try {
+        const response = await axios.delete(`${API_ENDPOINTS.USERS.ALL}/${userId}`, {
+            withCredentials: true
+        });
+
+        return response.data;
+    } catch (error) {
+        handleBackendError(error);
+
         throw error;
     }
 };

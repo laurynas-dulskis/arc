@@ -11,7 +11,7 @@ export function AdminPanel() {
     }, []);
 
     return (
-        <div className="flex flex-col items-center bg-gray-50 min-h-screen pt-12 pb-6">
+        <div className="flex flex-col items-center bg-gray-50 min-h-screen pt-8 pb-6">
             {isAdmin ?  <h1 className="text-4xl font-bold text-gray-800">Admin panel</h1> : null}
             <div className="grid grid-cols-3 gap-4 mt-6">
             <Button
