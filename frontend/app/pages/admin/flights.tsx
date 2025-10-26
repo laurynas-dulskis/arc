@@ -89,9 +89,19 @@ export function Flights() {
             errors.seatsTotal = "Seats total must be positive";
         }
 
+        if (flight.seatsTotal < flight.seatsAvailable) {
+            errors.seatsTotal = "Seats total cannot be less than seats available";
+        }
+
         if (flight.seatsAvailable < 0) {
             errors.seatsAvailable = "Seats available cannot be negative";
         }
+
+        if (flight.seatsAvailable > flight.seatsTotal) {
+            errors.seatsAvailable = "Seats available cannot exceed seats total";
+        }
+
+
 
         return errors;
     };
