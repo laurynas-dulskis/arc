@@ -15,4 +15,6 @@ class FlightFilterRequest
     public ?DateTimeImmutable $dateFrom = null;
 
     public ?DateTimeImmutable $dateTo = null;
+
+    public ?int $page = null;
 }

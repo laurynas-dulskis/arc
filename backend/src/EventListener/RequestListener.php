@@ -24,6 +24,10 @@ class RequestListener
             'path' => '/flights',
             'method' => 'get',
         ],
+        [
+            'path' => '/flights/pages',
+            'method' => 'get',
+        ],
     ];
 
     public function __construct(

@@ -4,18 +4,21 @@ import SearchCard from "../components/searchCard";
 import FlightsList from "../components/flightsList";
 import { signInWithGoogle } from "../utils/authUtils";
 import {showToast} from "../utils/toastUtils";
-import {getAllFlights} from "~/clients/flightsClient";
+import {getAllFlights, getAllFlightsPagesCount} from "~/clients/flightsClient";
 import type { Flight } from "~/model/flight";
 
 export function Home() {
     const [isSigningIn, setIsSigningIn] = React.useState(false);
     const [isFetchingFlights, setIsFetchingFlights] = React.useState(false);
     const [flights, setFlights] = React.useState<Flight[]>([]);
+    const [numberOfPages, setNumberOfPages] = React.useState(1);
+    const [currentPage, setCurrentPage] = React.useState(1);
     const [searchParams, setSearchParams] = React.useState({
         from: '',
         to: '',
         dateFrom: '',
         dateTo: '',
+        page: 1,
     });
 
     const handleGoogleSignIn = async () => {
@@ -30,8 +33,22 @@ export function Home() {
         }
     };
 
+    const findOutCountOfPages = () => {
+        getAllFlightsPagesCount(searchParams).then((pages) => {
+            setNumberOfPages(pages)
+        })
+    }
+
+    const changePage = (page: number) => {
+        setSearchParams({ ...searchParams, page });
+        setCurrentPage(page);
+        handleSearch();
+    }
+
     const handleSearch = () => {
         setIsFetchingFlights(true);
+
+        findOutCountOfPages();
 
         getAllFlights(searchParams)
             .then((data: Flight[]) => {
@@ -92,8 +109,15 @@ export function Home() {
                 setSearchParams={setSearchParams}
                 handleSearch={handleSearch}
                 isFetchingFlights={isFetchingFlights}
+                setCurrentPage={setCurrentPage}
             />
-            <FlightsList flights={flights} isFetchingFlights={isFetchingFlights} />
+            <FlightsList
+                flights={flights}
+                isFetchingFlights={isFetchingFlights}
+                numberOfPages={numberOfPages}
+                currentPage={currentPage}
+                changePage={changePage}
+            />
         </main>
     );
 }

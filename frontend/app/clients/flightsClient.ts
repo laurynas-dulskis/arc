@@ -3,9 +3,9 @@ import { API_ENDPOINTS } from '~/constants/api';
 import { handleBackendError } from '~/utils/errorUtils';
 import { showToast } from '~/utils/toastUtils';
 
-export const getAllFlights = async (params?: { from?: string; to?: string; startDate?: string; endDate?: string }) => {
+export const getAllFlights = async (params?: { from?: string; to?: string; startDate?: string; endDate?: string, page?: number }) => {
     try {
-        const filteredParams: { [key: string]: string } = {};
+        const filteredParams: { [key: string]: string|number } = {};
         if (params) {
             for (const [key, value] of Object.entries(params)) {
                 if (value) {
@@ -18,6 +18,28 @@ export const getAllFlights = async (params?: { from?: string; to?: string; start
         const response = await axios.get(API_ENDPOINTS.FLIGHTS.ALL, config);
 
         return response.data;
+    } catch (error) {
+        handleBackendError(error);
+
+        throw error;
+    }
+};
+
+export const getAllFlightsPagesCount = async (params?: { from?: string; to?: string; startDate?: string; endDate?: string, page?: number }) => {
+    try {
+        const filteredParams: { [key: string]: string|number } = {};
+        if (params) {
+            for (const [key, value] of Object.entries(params)) {
+                if (value) {
+                    filteredParams[key] = value;
+                }
+            }
+        }
+
+        const config = Object.keys(filteredParams).length ? { params: filteredParams } : {};
+        const response = await axios.get(API_ENDPOINTS.FLIGHTS.PAGES, config);
+
+        return response.data.pages;
     } catch (error) {
         handleBackendError(error);
 

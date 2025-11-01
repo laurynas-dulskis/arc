@@ -39,6 +39,17 @@ class FlightController
         );
     }
 
+    #[Route('/pages', name: 'flight_get_collection_pages', methods: ['GET'])]
+    public function getCollectionPages(
+        #[MapQueryString(validationFailedStatusCode: Response::HTTP_UNPROCESSABLE_ENTITY)]
+        FlightFilterRequest $request,
+    ): JsonResponse {
+        return new JsonResponse(
+            $this->flightQueryService->getAllFlightsPagesCount($request),
+            Response::HTTP_OK
+        );
+    }
+
     #[Route(name: 'flight_create', methods: ['POST'])]
     public function create(
         #[MapRequestPayload] FlightCreateRequest $request,

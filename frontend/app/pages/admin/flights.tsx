@@ -101,8 +101,6 @@ export function Flights() {
             errors.seatsAvailable = "Seats available cannot exceed seats total";
         }
 
-
-
         return errors;
     };
 

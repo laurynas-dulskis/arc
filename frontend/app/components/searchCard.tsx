@@ -8,13 +8,15 @@ interface SearchCardProps {
         to: string;
         dateFrom: string;
         dateTo: string;
+        page: number;
     };
     setSearchParams: React.Dispatch<React.SetStateAction<any>>;
+    setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
     handleSearch: () => void;
     isFetchingFlights: boolean;
 }
 
-const SearchCard: React.FC<SearchCardProps> = ({ searchParams, setSearchParams, handleSearch, isFetchingFlights }) => {
+const SearchCard: React.FC<SearchCardProps> = ({ searchParams, setSearchParams, handleSearch, isFetchingFlights, setCurrentPage }) => {
     return (
         <div className="mt-6 w-full max-w-5xl bg-white rounded-xl shadow border border-gray-200 p-4">
             <div className="flex flex-wrap gap-3 justify-between">
@@ -29,7 +31,7 @@ const SearchCard: React.FC<SearchCardProps> = ({ searchParams, setSearchParams, 
                         onChange={(e) => {
                             const value = e.target.value.toUpperCase();
                             if (/^[A-Z]{0,3}$/.test(value)) {
-                                setSearchParams({ ...searchParams, from: value });
+                                setSearchParams({ ...searchParams, from: value, page: 1 });
                             }
                         }}
                     />
@@ -45,7 +47,7 @@ const SearchCard: React.FC<SearchCardProps> = ({ searchParams, setSearchParams, 
                         onChange={(e) => {
                             const value = e.target.value.toUpperCase();
                             if (/^[A-Z]{0,3}$/.test(value)) {
-                                setSearchParams({ ...searchParams, to: value });
+                                setSearchParams({ ...searchParams, to: value, page: 1 });
                             }
                         }}
                     />
@@ -62,7 +64,7 @@ const SearchCard: React.FC<SearchCardProps> = ({ searchParams, setSearchParams, 
                                 showToast("Departure date cannot be after arrival date", "error");
                                 return;
                             }
-                            setSearchParams({ ...searchParams, dateFrom: e.target.value });
+                            setSearchParams({ ...searchParams, dateFrom: e.target.value, page: 1 });
                         }}
                     />
                 </div>
@@ -78,7 +80,7 @@ const SearchCard: React.FC<SearchCardProps> = ({ searchParams, setSearchParams, 
                                 showToast("Arrival date cannot be before departure date", "error");
                                 return;
                             }
-                            setSearchParams({ ...searchParams, dateTo: e.target.value });
+                            setSearchParams({ ...searchParams, dateTo: e.target.value, page: 1 });
                         }}
                     />
                 </div>
@@ -86,7 +88,10 @@ const SearchCard: React.FC<SearchCardProps> = ({ searchParams, setSearchParams, 
                     <Button
                         text="Search"
                         color="bg-blue-600"
-                        onClick={handleSearch}
+                        onClick={()  => {
+                            setCurrentPage(1);
+                            handleSearch();
+                        }}
                         disabled={isFetchingFlights}
                     />
                 </div>
