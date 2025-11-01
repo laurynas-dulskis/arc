@@ -46,7 +46,9 @@ class AuthController
 
             return $response;
         } catch (Throwable $e) {
-            return new JsonRedirectResponse($this->portalUrl);
+            return new JsonRedirectResponse(
+                $this->portalUrl.'?error='.urlencode('You dont have access to this application.'),
+            );
         }
     }
 }

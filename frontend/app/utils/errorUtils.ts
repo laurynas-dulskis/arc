@@ -9,6 +9,12 @@ export function handleBackendError(error, customMessage = null) {
         error.status === 401
         || error.status === 403
     ){
+        if(error.response.data.error !== undefined){
+            showToast(error.response.data.error, "error");
+        } else {
+            showToast("You are not authorized to perform this action.", "error");
+        }
+
         logout();
 
         return;

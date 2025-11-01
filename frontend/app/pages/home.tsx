@@ -64,6 +64,23 @@ export function Home() {
     };
 
     React.useEffect(() => {
+        try {
+            if (typeof window !== 'undefined') {
+                const params = new URLSearchParams(window.location.search);
+                const error = params.get('error');
+
+                if (error) {
+                    showToast(decodeURIComponent(error), 'error');
+
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('error');
+                    window.history.replaceState({}, document.title, url.toString());
+                }
+            }
+        } catch (e) {
+            console.error('Failed to read query parameters', e);
+        }
+
         handleSearch();
     }, []);
 

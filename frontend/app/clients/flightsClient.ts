@@ -7,9 +7,9 @@ export const getAllFlights = async (params?: { from?: string; to?: string; start
     try {
         const filteredParams: { [key: string]: string } = {};
         if (params) {
-            for (const key in params) {
-                if (params[key]) {
-                    filteredParams[key] = params[key] as string;
+            for (const [key, value] of Object.entries(params)) {
+                if (value) {
+                    filteredParams[key] = value;
                 }
             }
         }

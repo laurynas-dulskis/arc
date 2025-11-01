@@ -70,7 +70,7 @@ class GoogleAuthService
             $user->setGoogleId($googleUser['sub'])
                 ->setEmail($googleUser['email'])
                 ->setFirstName($googleUser['given_name'])
-                ->setLastName($googleUser['family_name'])
+                ->setLastName($googleUser['family_name'] ?? '')
                 ->setRole(UserRole::User)
             ;
 
