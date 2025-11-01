@@ -6,7 +6,15 @@ export interface Flight {
     departureTime: string;
     arrivalTime: string;
     durationMinutes: number;
-    basePriceCents: number;
     seatsTotal: number;
-    seatsAvailable: number;
+    numberOfLayovers: number;
+    basePriceCentsEconomy: number;
+    basePriceCentsBusiness: number;
+    basePriceCentsFirstClass: number;
+    seatsAvailableEconomy: number;
+    seatsAvailableBusiness: number;
+    seatsAvailableFirstClass: number;
+    seatsEconomy: number;
+    seatsBusiness: number;
+    seatsFirstClass: number;
 }

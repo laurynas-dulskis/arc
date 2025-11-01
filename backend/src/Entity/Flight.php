@@ -25,6 +25,9 @@ class Flight
     #[ORM\Column(type: 'string')]
     private ?string $destination = null;
 
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    private ?int $numberOfLayovers = null;
+
     #[ORM\Column(type: 'datetime_immutable')]
     private ?DateTimeImmutable $departureTime = null;
 
@@ -34,14 +37,35 @@ class Flight
     #[ORM\Column(type: 'integer')]
     private ?int $durationMinutes = null;
 
-    #[ORM\Column(type: 'integer')]
-    private ?int $basePriceCents = null;
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    private ?int $basePriceCentsEconomy = null;
+
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    private ?int $basePriceCentsBusiness = null;
+
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    private ?int $basePriceCentsFirstClass = null;
+
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    private ?int $seatsEconomy = null;
+
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    private ?int $seatsBusiness = null;
+
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    private ?int $seatsFirstClass = null;
 
     #[ORM\Column(type: 'integer')]
     private ?int $seatsTotal = null;
 
-    #[ORM\Column(type: 'integer')]
-    private ?int $seatsAvailable = null;
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    private ?int $seatsAvailableEconomy = null;
+
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    private ?int $seatsAvailableBusiness = null;
+
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    private ?int $seatsAvailableFirstClass = null;
 
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $createdAt;
@@ -128,18 +152,6 @@ class Flight
         return $this;
     }
 
-    public function getBasePriceCents(): ?int
-    {
-        return $this->basePriceCents;
-    }
-
-    public function setBasePriceCents(int $basePriceCents): self
-    {
-        $this->basePriceCents = $basePriceCents;
-
-        return $this;
-    }
-
     public function getSeatsTotal(): ?int
     {
         return $this->seatsTotal;
@@ -152,20 +164,128 @@ class Flight
         return $this;
     }
 
-    public function getSeatsAvailable(): ?int
+    public function getCreatedAt(): DateTimeImmutable
     {
-        return $this->seatsAvailable;
+        return $this->createdAt;
     }
 
-    public function setSeatsAvailable(int $seatsAvailable): self
+    public function getNumberOfLayovers(): ?int
     {
-        $this->seatsAvailable = $seatsAvailable;
+        return $this->numberOfLayovers;
+    }
+
+    public function setNumberOfLayovers(int $numberOfLayovers): self
+    {
+        $this->numberOfLayovers = $numberOfLayovers;
 
         return $this;
     }
 
-    public function getCreatedAt(): DateTimeImmutable
+    public function getBasePriceCentsEconomy(): ?int
     {
-        return $this->createdAt;
+        return $this->basePriceCentsEconomy;
+    }
+
+    public function setBasePriceCentsEconomy(int $basePriceCentsEconomy): self
+    {
+        $this->basePriceCentsEconomy = $basePriceCentsEconomy;
+
+        return $this;
+    }
+
+    public function getBasePriceCentsBusiness(): ?int
+    {
+        return $this->basePriceCentsBusiness;
+    }
+
+    public function setBasePriceCentsBusiness(int $basePriceCentsBusiness): self
+    {
+        $this->basePriceCentsBusiness = $basePriceCentsBusiness;
+
+        return $this;
+    }
+
+    public function getBasePriceCentsFirstClass(): ?int
+    {
+        return $this->basePriceCentsFirstClass;
+    }
+
+    public function setBasePriceCentsFirstClass(int $basePriceCentsFirstClass): self
+    {
+        $this->basePriceCentsFirstClass = $basePriceCentsFirstClass;
+
+        return $this;
+    }
+
+    public function getSeatsEconomy(): ?int
+    {
+        return $this->seatsEconomy;
+    }
+
+    public function setSeatsEconomy(int $seatsEconomy): self
+    {
+        $this->seatsEconomy = $seatsEconomy;
+
+        return $this;
+    }
+
+    public function getSeatsBusiness(): ?int
+    {
+        return $this->seatsBusiness;
+    }
+
+    public function setSeatsBusiness(int $seatsBusiness): self
+    {
+        $this->seatsBusiness = $seatsBusiness;
+
+        return $this;
+    }
+
+    public function getSeatsFirstClass(): ?int
+    {
+        return $this->seatsFirstClass;
+    }
+
+    public function setSeatsFirstClass(int $seatsFirstClass): self
+    {
+        $this->seatsFirstClass = $seatsFirstClass;
+
+        return $this;
+    }
+
+    public function getSeatsAvailableEconomy(): ?int
+    {
+        return $this->seatsAvailableEconomy;
+    }
+
+    public function setSeatsAvailableEconomy(int $seatsAvailableEconomy): self
+    {
+        $this->seatsAvailableEconomy = $seatsAvailableEconomy;
+
+        return $this;
+    }
+
+    public function getSeatsAvailableBusiness(): ?int
+    {
+        return $this->seatsAvailableBusiness;
+    }
+
+    public function setSeatsAvailableBusiness(int $seatsAvailableBusiness): self
+    {
+        $this->seatsAvailableBusiness = $seatsAvailableBusiness;
+
+        return $this;
+    }
+
+    public function getSeatsAvailableFirstClass(): ?int
+    {
+        return $this->seatsAvailableFirstClass;
+    }
+
+    public function setSeatsAvailableFirstClass(int $seatsAvailableFirstClass): self
+    {
+        $this->seatsAvailableFirstClass = $seatsAvailableFirstClass;
+
+        return $this;
     }
 }

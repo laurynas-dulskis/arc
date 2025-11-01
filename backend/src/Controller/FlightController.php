@@ -65,6 +65,16 @@ class FlightController
         );
     }
 
+    #[Route('/{flightId}', name: 'flight_get', methods: ['GET'])]
+    public function get(
+        int $flightId,
+    ): JsonResponse {
+        return new JsonResponse(
+            $this->flightQueryService->getOne($flightId),
+            Response::HTTP_OK
+        );
+    }
+
     #[Route('/{id}', name: 'flight_update', methods: ['PUT'])]
     public function update(
         #[MapRequestPayload] FlightUpdateRequest $request,

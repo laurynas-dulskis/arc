@@ -18,9 +18,17 @@ class FlightNormalizer
             'departureTime' => $flight->getDepartureTime()->format('Y-m-d h:i:s'),
             'arrivalTime' => $flight->getArrivalTime()->format('Y-m-d h:i:s'),
             'durationMinutes' => $flight->getDurationMinutes(),
-            'basePriceCents' => $flight->getBasePriceCents(),
             'seatsTotal' => $flight->getSeatsTotal(),
-            'seatsAvailable' => $flight->getSeatsAvailable(),
+            'numberOfLayovers' => $flight->getNumberOfLayovers(),
+            'basePriceCentsEconomy' => $flight->getBasePriceCentsEconomy(),
+            'basePriceCentsBusiness' => $flight->getBasePriceCentsBusiness(),
+            'basePriceCentsFirstClass' => $flight->getBasePriceCentsFirstClass(),
+            'seatsEconomy' => $flight->getSeatsEconomy(),
+            'seatsBusiness' => $flight->getSeatsBusiness(),
+            'seatsFirstClass' => $flight->getSeatsFirstClass(),
+            'seatsAvailableEconomy' => $flight->getSeatsAvailableEconomy(),
+            'seatsAvailableBusiness' => $flight->getSeatsAvailableBusiness(),
+            'seatsAvailableFirstClass' => $flight->getSeatsAvailableFirstClass(),
         ];
     }
 }

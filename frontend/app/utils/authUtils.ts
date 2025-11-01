@@ -59,6 +59,10 @@ export function logout() {
     window.location.href = ROUTES.HOME;
 }
 
+export function isLoggedIn(): boolean {
+    return getAccessTokenData() !== null;
+}
+
 export function isAdmin(): boolean {
     return getAccessTokenData()?.role === UserRoles.ADMIN;
 }
@@ -69,6 +73,17 @@ export function ensureAdminAccess(): boolean {
 
         window.location.href = ROUTES.HOME;
 
+        return false;
+    }
+
+    return true;
+}
+
+export function ensureLoggedIn(): boolean {
+    if (!isLoggedIn()) {
+        showToast("Please log in to continue.", "error");
+        window.location.href = ROUTES.HOME;
+        
         return false;
     }
 

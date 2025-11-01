@@ -41,7 +41,17 @@ class FlightUpdateRequest
     #[Assert\NotNull]
     #[Assert\GreaterThan(0)]
     #[Assert\Type('int')]
-    public ?int $basePriceCents = null;
+    public ?int $basePriceCentsEconomy = null;
+
+    #[Assert\NotNull]
+    #[Assert\GreaterThan(0)]
+    #[Assert\Type('int')]
+    public ?int $basePriceCentsBusiness = null;
+
+    #[Assert\NotNull]
+    #[Assert\GreaterThan(0)]
+    #[Assert\Type('int')]
+    public ?int $basePriceCentsFirstClass = null;
 
     #[Assert\NotNull]
     #[Assert\GreaterThan(0)]
@@ -51,7 +61,37 @@ class FlightUpdateRequest
     #[Assert\NotNull]
     #[Assert\GreaterThanOrEqual(0)]
     #[Assert\Type('int')]
-    public ?int $seatsAvailable = null;
+    public ?int $seatsEconomy = null;
+
+    #[Assert\NotNull]
+    #[Assert\GreaterThanOrEqual(0)]
+    #[Assert\Type('int')]
+    public ?int $seatsBusiness = null;
+
+    #[Assert\NotNull]
+    #[Assert\GreaterThanOrEqual(0)]
+    #[Assert\Type('int')]
+    public ?int $seatsFirstClass = null;
+
+    #[Assert\NotNull]
+    #[Assert\GreaterThanOrEqual(0)]
+    #[Assert\Type('int')]
+    public ?int $numberOfLayovers = null;
+
+    #[Assert\NotNull]
+    #[Assert\GreaterThanOrEqual(0)]
+    #[Assert\Type('int')]
+    public ?int $seatsAvailableEconomy = null;
+
+    #[Assert\NotNull]
+    #[Assert\GreaterThanOrEqual(0)]
+    #[Assert\Type('int')]
+    public ?int $seatsAvailableBusiness = null;
+
+    #[Assert\NotNull]
+    #[Assert\GreaterThanOrEqual(0)]
+    #[Assert\Type('int')]
+    public ?int $seatsAvailableFirstClass = null;
 
     #[Assert\Callback]
     public function validateTimes(ExecutionContextInterface $context): void

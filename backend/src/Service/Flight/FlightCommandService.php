@@ -26,9 +26,17 @@ class FlightCommandService
             ->setDepartureTime($request->departureTime)
             ->setArrivalTime($request->arrivalTime)
             ->setDurationMinutes($request->durationMinutes)
-            ->setBasePriceCents($request->basePriceCents)
             ->setSeatsTotal($request->seatsTotal)
-            ->setSeatsAvailable($request->seatsAvailable)
+            ->setBasePriceCentsEconomy($request->basePriceCentsEconomy)
+            ->setBasePriceCentsBusiness($request->basePriceCentsBusiness)
+            ->setBasePriceCentsFirstClass($request->basePriceCentsFirstClass)
+            ->setSeatsEconomy($request->seatsEconomy)
+            ->setSeatsBusiness($request->seatsBusiness)
+            ->setSeatsFirstClass($request->seatsFirstClass)
+            ->setSeatsAvailableEconomy($request->seatsAvailableEconomy)
+            ->setSeatsAvailableBusiness($request->seatsAvailableBusiness)
+            ->setSeatsAvailableFirstClass($request->seatsAvailableFirstClass)
+            ->setNumberOfLayovers($request->numberOfLayovers)
         ;
 
         $this->entityManager->persist($flight);
@@ -46,9 +54,17 @@ class FlightCommandService
             ->setDepartureTime($request->departureTime)
             ->setArrivalTime($request->arrivalTime)
             ->setDurationMinutes($request->durationMinutes)
-            ->setBasePriceCents($request->basePriceCents)
             ->setSeatsTotal($request->seatsTotal)
-            ->setSeatsAvailable($request->seatsAvailable)
+            ->setBasePriceCentsEconomy($request->basePriceCentsEconomy)
+            ->setBasePriceCentsBusiness($request->basePriceCentsBusiness)
+            ->setBasePriceCentsFirstClass($request->basePriceCentsFirstClass)
+            ->setSeatsEconomy($request->seatsEconomy)
+            ->setSeatsBusiness($request->seatsBusiness)
+            ->setSeatsFirstClass($request->seatsFirstClass)
+            ->setSeatsAvailableEconomy($request->seatsAvailableEconomy)
+            ->setSeatsAvailableBusiness($request->seatsAvailableBusiness)
+            ->setSeatsAvailableFirstClass($request->seatsAvailableFirstClass)
+            ->setNumberOfLayovers($request->numberOfLayovers)
         ;
 
         $this->entityManager->flush();

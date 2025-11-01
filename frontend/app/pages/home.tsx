@@ -19,6 +19,10 @@ export function Home() {
         dateFrom: '',
         dateTo: '',
         page: 1,
+        class: '',
+        seatCount: 0,
+        priceRange: '',
+        sort: '',
     });
 
     const handleGoogleSignIn = async () => {
@@ -110,6 +114,7 @@ export function Home() {
                 handleSearch={handleSearch}
                 isFetchingFlights={isFetchingFlights}
                 setCurrentPage={setCurrentPage}
+                maxPrice={1000}
             />
             <FlightsList
                 flights={flights}

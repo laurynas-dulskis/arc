@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Dto\Flight\FlightFilterRequest;
 use App\Entity\Flight;
+use App\Enum\FlightClass;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -53,12 +54,87 @@ class FlightRepository extends ServiceEntityRepository
             ;
         }
 
+        if (null !== $request->class){
+            switch ($request->class){
+                case FLightClass::Economy->value:
+                    if (null !== $request->seatCount) {
+                        $queryBuilder->andWhere('f.seatsEconomy >= :seatCount')
+                            ->setParameter('seatCount', $request->seatCount)
+                        ;
+                    }
+                    if (null !== $request->priceRange) {
+                        [$minPrice, $maxPrice] = explode('-', $request->priceRange);
+                        $queryBuilder->andWhere('f.basePriceCentsEconomy BETWEEN :minPrice AND :maxPrice')
+                            ->setParameter('minPrice', (int)$minPrice*100)
+                            ->setParameter('maxPrice', (int)$maxPrice*100)
+                        ;
+                    }
+                    break;
+                case FLightClass::Business->value:
+                    if (null !== $request->seatCount) {
+                        $queryBuilder->andWhere('f.seatsBusiness >= :seatCount')
+                            ->setParameter('seatCount', $request->seatCount)
+                        ;
+                    }
+                    if (null !== $request->priceRange) {
+                        [$minPrice, $maxPrice] = explode('-', $request->priceRange);
+                        $queryBuilder->andWhere('f.basePriceCentsBusiness BETWEEN :minPrice AND :maxPrice')
+                            ->setParameter('minPrice', (int)$minPrice*100)
+                            ->setParameter('maxPrice', (int)$maxPrice*100)
+                        ;
+                    }
+                    break;
+                case FLightClass::First->value:
+                    if (null !== $request->seatCount) {
+                        $queryBuilder->andWhere('f.seatsFirstClass >= :seatCount')
+                            ->setParameter('seatCount', $request->seatCount)
+                        ;
+                    }
+                    if (null !== $request->priceRange) {
+                        [$minPrice, $maxPrice] = explode('-', $request->priceRange);
+                        $queryBuilder->andWhere('f.basePriceCentsFirstClass BETWEEN :minPrice AND :maxPrice')
+                            ->setParameter('minPrice', (int)$minPrice*100)
+                            ->setParameter('maxPrice', (int)$maxPrice*100)
+                        ;
+                    }
+                    break;
+            }
+        }else{
+            if (null !== $request->seatCount) {
+                $queryBuilder->andWhere('f.seatsEconomy >= :seatCount OR f.seatsBusiness >= :seatCount OR f.seatsFirstClass >= :seatCount')
+                    ->setParameter('seatCount', $request->seatCount)
+                ;
+            }
+
+            if (null !== $request->priceRange) {
+                [$minPrice, $maxPrice] = explode('-', $request->priceRange);
+                $queryBuilder->andWhere('(f.basePriceCentsEconomy BETWEEN :minPrice AND :maxPrice) OR (f.basePriceCentsBusiness BETWEEN :minPrice AND :maxPrice) OR (f.basePriceCentsFirstClass BETWEEN :minPrice AND :maxPrice)')
+                    ->setParameter('minPrice', (int)$minPrice*100)
+                    ->setParameter('maxPrice', (int)$maxPrice*100)
+                ;
+            }
+        }
+
         $page = 1;
         if (null !== $request->page) {
             $page = max(1, $request->page);
         }
 
         $offset = ($page - 1) * $limit;
+
+        if ('cheapest' === $request->sort) {
+            $queryBuilder
+                ->addOrderBy('f.basePriceCentsEconomy', 'ASC')
+                ->addOrderBy('f.basePriceCentsBusiness', 'ASC')
+                ->addOrderBy('f.basePriceCentsFirstClass', 'ASC');
+        }
+
+        if ('most_expensive' === $request->sort) {
+            $queryBuilder
+                ->addOrderBy('f.basePriceCentsFirstClass', 'DESC')
+                ->addOrderBy('f.basePriceCentsBusiness', 'DESC')
+                ->addOrderBy('f.basePriceCentsEconomy', 'DESC');
+        }
 
         return $queryBuilder
             ->andWhere('f.departureTime > :now')
@@ -97,6 +173,67 @@ class FlightRepository extends ServiceEntityRepository
             $queryBuilder->andWhere('f.arrivalTime <= :dateTo')
                 ->setParameter('dateTo', $request->dateTo)
             ;
+        }
+
+        if (null !== $request->class){
+            switch ($request->class){
+                case FLightClass::Economy->value:
+                    if (null !== $request->seatCount) {
+                        $queryBuilder->andWhere('f.seatsEconomy >= :seatCount')
+                            ->setParameter('seatCount', $request->seatCount)
+                        ;
+                    }
+                    if (null !== $request->priceRange) {
+                        [$minPrice, $maxPrice] = explode('-', $request->priceRange);
+                        $queryBuilder->andWhere('f.basePriceCentsEconomy BETWEEN :minPrice AND :maxPrice')
+                            ->setParameter('minPrice', (int)$minPrice*100)
+                            ->setParameter('maxPrice', (int)$maxPrice*100)
+                        ;
+                    }
+                    break;
+                case FLightClass::Business->value:
+                    if (null !== $request->seatCount) {
+                        $queryBuilder->andWhere('f.seatsBusiness >= :seatCount')
+                            ->setParameter('seatCount', $request->seatCount)
+                        ;
+                    }
+                    if (null !== $request->priceRange) {
+                        [$minPrice, $maxPrice] = explode('-', $request->priceRange);
+                        $queryBuilder->andWhere('f.basePriceCentsBusiness BETWEEN :minPrice AND :maxPrice')
+                            ->setParameter('minPrice', (int)$minPrice*100)
+                            ->setParameter('maxPrice', (int)$maxPrice*100)
+                        ;
+                    }
+                    break;
+                case FLightClass::First->value:
+                    if (null !== $request->seatCount) {
+                        $queryBuilder->andWhere('f.seatsFirstClass >= :seatCount')
+                            ->setParameter('seatCount', $request->seatCount)
+                        ;
+                    }
+                    if (null !== $request->priceRange) {
+                        [$minPrice, $maxPrice] = explode('-', $request->priceRange);
+                        $queryBuilder->andWhere('f.basePriceCentsFirstClass BETWEEN :minPrice AND :maxPrice')
+                            ->setParameter('minPrice', (int)$minPrice*100)
+                            ->setParameter('maxPrice', (int)$maxPrice*100)
+                        ;
+                    }
+                    break;
+            }
+        }else{
+            if (null !== $request->seatCount) {
+                $queryBuilder->andWhere('f.seatsEconomy >= :seatCount OR f.seatsBusiness >= :seatCount OR f.seatsFirstClass >= :seatCount')
+                    ->setParameter('seatCount', $request->seatCount)
+                ;
+            }
+
+            if (null !== $request->priceRange) {
+                [$minPrice, $maxPrice] = explode('-', $request->priceRange);
+                $queryBuilder->andWhere('(f.basePriceCentsEconomy BETWEEN :minPrice AND :maxPrice) OR (f.basePriceCentsBusiness BETWEEN :minPrice AND :maxPrice) OR (f.basePriceCentsFirstClass BETWEEN :minPrice AND :maxPrice)')
+                    ->setParameter('minPrice', (int)$minPrice*100)
+                    ->setParameter('maxPrice', (int)$maxPrice*100)
+                ;
+            }
         }
 
         $totalFlights = (int) $queryBuilder

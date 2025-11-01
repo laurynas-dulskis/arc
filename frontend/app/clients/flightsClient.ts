@@ -25,6 +25,20 @@ export const getAllFlights = async (params?: { from?: string; to?: string; start
     }
 };
 
+export const getFlightById = async (id: string | number) => {
+    try {
+        const response = await axios.get(`${API_ENDPOINTS.FLIGHTS.ALL}/${id}`, {
+            withCredentials: true
+        });
+
+        return response.data;
+    } catch (error) {
+        handleBackendError(error);
+
+        throw error;
+    }
+};
+
 export const getAllFlightsPagesCount = async (params?: { from?: string; to?: string; startDate?: string; endDate?: string, page?: number }) => {
     try {
         const filteredParams: { [key: string]: string|number } = {};
