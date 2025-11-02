@@ -18,6 +18,10 @@ use App\Repository\TicketRepository;
 use App\Repository\UserRepository;
 use App\Security\UserToken;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 
 class ReservationComandService
 {
@@ -27,6 +31,9 @@ class ReservationComandService
         private readonly EntityManagerInterface $entityManager,
         private readonly ReservationRepository $reservationRepository,
         private readonly TicketRepository $ticketRepository,
+        private readonly MailerInterface $mailer,
+        #[Autowire('%env(FORM_EMAIL)%')]
+        private readonly string $emailFromAddress
     ) {
     }
 
@@ -198,6 +205,20 @@ class ReservationComandService
 
             $reservation->setStatus(ReservationStatus::Paid);
             $this->entityManager->flush();
+
+            $email = (new TemplatedEmail())
+                ->from($this->emailFromAddress)
+                ->to($userToken->email)
+                ->subject('Reservation Confirmed')
+                ->htmlTemplate('emails/ConfirmReservation.html.twig')
+                ->context([
+                    'username' => $userToken->name,
+                    'reservationId' => $reservation->getId(),
+                    'ticketCount' => count($reservationConfirmRequest),
+                    'passengerNames' => array_map(fn($r) => $r->passengerName, $reservationConfirmRequest)
+                ]);
+
+            $this->mailer->send($email);
 
             $this->entityManager->commit();
         }catch(\Throwable $exception) {

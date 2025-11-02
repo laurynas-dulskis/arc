@@ -85,3 +85,6 @@ This project consists of a full-stack application with the following components:
 ├── compose.yaml             # Docker Compose configuration
 └── README.md                # Project documentation
 ```
+
+fix flights creation
+addd comand to run
