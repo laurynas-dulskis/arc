@@ -23,6 +23,15 @@ class FlightRepository extends ServiceEntityRepository
         return $this->find($id);
     }
 
+    public function findAllFlightsAll(): array
+    {
+        return $this->createQueryBuilder('f')
+            ->orderBy('f.departureTime', 'DESC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
     /**
      * @return Flight[]
      */

@@ -7,6 +7,7 @@ export const API_ENDPOINTS = {
   FLIGHTS: {
     ALL: `${API_BASE_URL}/flights`,
     PAGES: `${API_BASE_URL}/flights/pages`,
+    ALL_ALL: `${API_BASE_URL}/flights/all`,
   },
   USERS: {
     ALL: `${API_BASE_URL}/users`,

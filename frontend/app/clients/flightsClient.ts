@@ -25,6 +25,20 @@ export const getAllFlights = async (params?: { from?: string; to?: string; start
     }
 };
 
+export const getAllFlightsAll = async () => {
+    try {
+        const response = await axios.get(API_ENDPOINTS.FLIGHTS.ALL_ALL, {
+            withCredentials: true
+        });
+
+        return response.data;
+    } catch (error) {
+        handleBackendError(error);
+
+        throw error;
+    }
+};
+
 export const getFlightById = async (id: string | number) => {
     try {
         const response = await axios.get(`${API_ENDPOINTS.FLIGHTS.ALL}/${id}`, {

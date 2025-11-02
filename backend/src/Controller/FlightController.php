@@ -39,6 +39,18 @@ class FlightController
         );
     }
 
+    #[Route('/all', name: 'flight_get_collection_all', methods: ['GET'])]
+    public function getCollectionAll(
+        UserToken $userToken,
+    ): JsonResponse {
+        $this->accessValidator->validateIsAdmin($userToken);
+
+        return new JsonResponse(
+            $this->flightQueryService->getAllAll(),
+            Response::HTTP_OK
+        );
+    }
+
     #[Route('/pages', name: 'flight_get_collection_pages', methods: ['GET'])]
     public function getCollectionPages(
         #[MapQueryString(validationFailedStatusCode: Response::HTTP_UNPROCESSABLE_ENTITY)]

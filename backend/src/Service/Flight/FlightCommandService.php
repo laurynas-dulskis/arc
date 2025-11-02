@@ -26,16 +26,20 @@ class FlightCommandService
             ->setDepartureTime($request->departureTime)
             ->setArrivalTime($request->arrivalTime)
             ->setDurationMinutes($request->durationMinutes)
-            ->setSeatsTotal($request->seatsTotal)
+            ->setSeatsTotal(
+                $request->seatsEconomy +
+                $request->seatsBusiness +
+                $request->seatsFirstClass
+            )
             ->setBasePriceCentsEconomy($request->basePriceCentsEconomy)
             ->setBasePriceCentsBusiness($request->basePriceCentsBusiness)
             ->setBasePriceCentsFirstClass($request->basePriceCentsFirstClass)
             ->setSeatsEconomy($request->seatsEconomy)
             ->setSeatsBusiness($request->seatsBusiness)
             ->setSeatsFirstClass($request->seatsFirstClass)
-            ->setSeatsAvailableEconomy($request->seatsAvailableEconomy)
-            ->setSeatsAvailableBusiness($request->seatsAvailableBusiness)
-            ->setSeatsAvailableFirstClass($request->seatsAvailableFirstClass)
+            ->setSeatsAvailableEconomy($request->seatsEconomy)
+            ->setSeatsAvailableBusiness($request->seatsBusiness)
+            ->setSeatsAvailableFirstClass($request->seatsFirstClass)
             ->setNumberOfLayovers($request->numberOfLayovers)
         ;
 
@@ -54,16 +58,20 @@ class FlightCommandService
             ->setDepartureTime($request->departureTime)
             ->setArrivalTime($request->arrivalTime)
             ->setDurationMinutes($request->durationMinutes)
-            ->setSeatsTotal($request->seatsTotal)
+            ->setSeatsTotal(
+                $request->seatsEconomy +
+                $request->seatsBusiness +
+                $request->seatsFirstClass
+            )
             ->setBasePriceCentsEconomy($request->basePriceCentsEconomy)
             ->setBasePriceCentsBusiness($request->basePriceCentsBusiness)
             ->setBasePriceCentsFirstClass($request->basePriceCentsFirstClass)
             ->setSeatsEconomy($request->seatsEconomy)
             ->setSeatsBusiness($request->seatsBusiness)
             ->setSeatsFirstClass($request->seatsFirstClass)
-            ->setSeatsAvailableEconomy($request->seatsAvailableEconomy)
-            ->setSeatsAvailableBusiness($request->seatsAvailableBusiness)
-            ->setSeatsAvailableFirstClass($request->seatsAvailableFirstClass)
+            ->setSeatsAvailableEconomy($request->seatsEconomy)
+            ->setSeatsAvailableBusiness($request->seatsBusiness)
+            ->setSeatsAvailableFirstClass($request->seatsFirstClass)
             ->setNumberOfLayovers($request->numberOfLayovers)
         ;
 

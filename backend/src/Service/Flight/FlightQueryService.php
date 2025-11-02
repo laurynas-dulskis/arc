@@ -38,6 +38,16 @@ class FlightQueryService
         return $flights;
     }
 
+    public function getAllAll(): array
+    {
+        $flights = [];
+        foreach ($this->flightRepository->findAllFlightsAll() as $flight) {
+            $flights[] = $this->flightNormalizer->normalize($flight);
+        }
+
+        return $flights;
+    }
+
     public function getAllFlightsPagesCount(FlightFilterRequest $request): array
     {
         return [
