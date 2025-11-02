@@ -14,4 +14,26 @@ class TicketRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Ticket::class);
     }
+
+    public function findByReservationId(int $reservationId): array
+    {
+        return $this->createQueryBuilder('t')
+            ->where('t.reservation = :reservationId')
+            ->setParameter('reservationId', $reservationId)
+            ->orderBy('t.id', 'ASC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+    public function findByTicketId(int $ticketId): ?Ticket
+    {
+        return $this->createQueryBuilder('t')
+            ->where('t.id = :ticketId')
+            ->setParameter('ticketId', $ticketId)
+            ->orderBy('t.id', 'ASC')
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
 }

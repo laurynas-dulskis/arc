@@ -46,6 +46,7 @@ export function Reservations() {
                             <th className="px-4 py-2 text-left text-gray-700">Status</th>
                             <th className="px-4 py-2 text-left text-gray-700">Created At</th>
                             <th className="px-4 py-2 text-left text-gray-700">User</th>
+                            <th className="px-4 py-2 text-left text-gray-700">Route</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -69,6 +70,9 @@ export function Reservations() {
                                 </td>
                                 <td className="px-4 py-2 text-gray-700">
                                     {reservation.user}
+                                </td>
+                                <td className="px-4 py-2 text-gray-700">
+                                    {reservation.route}
                                 </td>
                             </tr>
                         ))}

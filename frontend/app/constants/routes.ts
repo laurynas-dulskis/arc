@@ -6,4 +6,6 @@ export const ROUTES = {
   ADMIN_RESERVATIONS: '/admin/reservations',
   ADMIN_FLIGHTS: '/admin/flights',
   FLIGHT: '/flights/:id',
+  RESERVATIONS: '/reservations',
+  RESERVATION_DETAILS: '/reservations/:id',
 } as const;

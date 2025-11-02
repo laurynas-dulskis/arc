@@ -9,4 +9,6 @@ export default ([
   route(ROUTES.ADMIN_RESERVATIONS, "pages/admin/reservations.tsx"),
   route(ROUTES.ADMIN_FLIGHTS, "pages/admin/flights.tsx"),
   route(ROUTES.FLIGHT, "pages/flightPage.tsx"),
+  route(ROUTES.RESERVATIONS, "pages/reservationsPage.tsx"),
+  route(ROUTES.RESERVATION_DETAILS, "pages/reservationDetailsPage.tsx"),
 ] as RouteConfig);

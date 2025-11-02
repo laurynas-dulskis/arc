@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\Reservation;
 
+use App\Dto\Reservation\ReservationConfirmRequest;
 use App\Dto\Reservation\UserReservationCreateRequest;
 use App\Entity\Reservation;
 use App\Entity\Ticket;
@@ -13,6 +14,7 @@ use App\Exception\EntityNotFoundException;
 use App\Normalizer\ReservationNormalizer;
 use App\Repository\FlightRepository;
 use App\Repository\ReservationRepository;
+use App\Repository\TicketRepository;
 use App\Repository\UserRepository;
 use App\Security\UserToken;
 use Doctrine\ORM\EntityManagerInterface;
@@ -23,6 +25,8 @@ class ReservationComandService
         private readonly FlightRepository $flightRepository,
         private readonly UserRepository $userRepository,
         private readonly EntityManagerInterface $entityManager,
+        private readonly ReservationRepository $reservationRepository,
+        private readonly TicketRepository $ticketRepository,
     ) {
     }
 
@@ -108,6 +112,97 @@ class ReservationComandService
             $this->entityManager->commit();
         }catch(\Throwable $exception) {
             $this->entityManager->rollback();
+            throw $exception;
+        }
+    }
+
+    public function cancel(int $reservationId, UserToken $userToken): void
+    {
+        $reservation = $this->reservationRepository->findByIdAndUserId($reservationId, $userToken->id);
+        if ($reservation === null) {
+            throw new EntityNotFoundException('Reservation not found', ['id' => $reservationId]);
+        }
+
+        if ($reservation->getStatus() === ReservationStatus::Cancelled) {
+            throw new \LogicException('Reservation is already cancelled');
+        }
+
+        if ($reservation->getStatus() === ReservationStatus::Paid) {
+            throw new \LogicException('Reservation is already paid and cannot be cancelled');
+        }
+
+        $tickets = $this->ticketRepository->findByReservationId($reservationId);
+        $flight = $tickets[0]->getFlight();
+
+        $this->entityManager->beginTransaction();
+        try {
+            foreach ($tickets as $ticket) {
+                $seatClass = $ticket->getSeatClass();
+                if ($seatClass === FlightClass::Economy->value) {
+                    $flight->setSeatsAvailableEconomy($flight->getSeatsAvailableEconomy() + 1);
+                } elseif ($seatClass === FlightClass::Business->value) {
+                    $flight->setSeatsAvailableBusiness($flight->getSeatsAvailableBusiness() + 1);
+                } elseif ($seatClass === FlightClass::First->value) {
+                    $flight->setSeatsAvailableFirstClass($flight->getSeatsAvailableFirstClass() + 1);
+                }
+
+                $this->entityManager->flush();
+            }
+
+            $reservation->setStatus(ReservationStatus::Cancelled);
+            $this->entityManager->flush();
+
+            $this->entityManager->commit();
+        }catch(\Throwable $exception) {
+            $this->entityManager->rollback();
+            throw $exception;
+        }
+    }
+
+    /**
+     * @param ReservationConfirmRequest[] $reservationConfirmRequest
+     */
+    public function confirm(
+        int $reservationId,
+        UserToken $userToken,
+        array $reservationConfirmRequest
+    ): void {
+        $reservation = $this->reservationRepository->findByIdAndUserId($reservationId, $userToken->id);
+        if ($reservation === null) {
+            throw new EntityNotFoundException('Reservation not found', ['id' => $reservationId]);
+        }
+
+        if ($reservation->getStatus() === ReservationStatus::Cancelled) {
+            throw new \LogicException('Reservation is already cancelled');
+        }
+
+        if ($reservation->getStatus() === ReservationStatus::Paid) {
+            throw new \LogicException('Reservation is already paid and cannot be cancelled');
+        }
+
+        $this->entityManager->beginTransaction();
+        try {
+            foreach ($reservationConfirmRequest as $request) {
+                $ticket = $this->ticketRepository->findByTicketId($request->ticketId);
+
+                if ($ticket === null || $ticket->getReservation()->getId() !== $reservation->getId()) {
+                    throw new EntityNotFoundException('Ticket not found for this reservation', ['id' => $request->ticketId]);
+                }
+
+                $ticket
+                    ->setPassengerName($request->passengerName)
+                    ->setPassengerDob($request->passengerDob);
+
+                $this->entityManager->flush();
+            }
+
+            $reservation->setStatus(ReservationStatus::Paid);
+            $this->entityManager->flush();
+
+            $this->entityManager->commit();
+        }catch(\Throwable $exception) {
+            $this->entityManager->rollback();
+
             throw $exception;
         }
     }

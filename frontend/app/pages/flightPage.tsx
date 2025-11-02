@@ -47,7 +47,7 @@ export function FlightPage() {
     }, []);
 
     const formatPrice = (cents: number) => {
-        return `$${(cents / 100).toFixed(2)}`;
+        return `Euro ${(cents / 100).toFixed(2)}`;
     };
 
     const clamp = (value: number, min = 0, max = Infinity) =>
