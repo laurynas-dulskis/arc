@@ -1,5 +1,6 @@
 import React from "react";
 import { getFlightById } from "~/clients/flightsClient";
+import { reserveSeats } from "~/clients/reservationsClient";
 import Button from "~/components/button";
 import Spinner from "~/components/spinner";
 import UserNavigationHeader from "~/components/userNavigationHeader";
@@ -94,9 +95,7 @@ export function FlightPage() {
 
         setIsReserving(true);
         try {
-            // TODO: Call your reservation API here with selected counts and flight.id
-            // Example:
-            // await reserveSeats({ flightId: flight!.id, economy: selectedEconomy, business: selectedBusiness, firstClass: selectedFirst });
+            await reserveSeats({ flightId: flight!.id, economy: selectedEconomy, business: selectedBusiness, firstClass: selectedFirst });
 
             showToast(
                 `Reserved ${totalSelected} seat(s) for flight ${flight!.flightNumber}. Total: ${formatPrice(
@@ -104,6 +103,8 @@ export function FlightPage() {
                 )}`,
                 "success"
             );
+
+            showToast("You have 3h to complete your payment.", "info");
 
             await fetchFlight();
         } catch (err) {

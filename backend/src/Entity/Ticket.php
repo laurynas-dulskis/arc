@@ -24,16 +24,16 @@ class Ticket
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Flight $flight = null;
 
-    #[ORM\Column(type: 'string')]
+    #[ORM\Column(type: 'string', nullable: true)]
     private ?string $passengerName = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?DateTimeImmutable $passengerDob = null;
 
     #[ORM\Column(type: 'string')]
     private ?string $seatClass = null;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(type: 'integer', nullable: true)]
     private ?int $seatNumber = null;
 
     #[ORM\Column(type: 'integer')]

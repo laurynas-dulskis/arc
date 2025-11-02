@@ -104,7 +104,7 @@ class ExceptionListener
                     $event->setResponse(
                         new JsonResponse(
                             [
-                                'error' => 'Validation Error',
+                                'error' => json_encode($violations),
                                 'validation_errors' => $violations,
                             ],
                             Response::HTTP_UNPROCESSABLE_ENTITY)
@@ -174,6 +174,18 @@ class ExceptionListener
                 );
 
                 break;
+                case \LogicException::class:
+                $this->logger->error('Logic exception caught: ', [
+                    'error_message' => $exception->getMessage(),
+                    'trace' => $exception->getTraceAsString(),
+                ]);
+
+                $event->setResponse(
+                    new JsonResponse([
+                        'error' => $exception->getMessage(),
+                    ], Response::HTTP_BAD_REQUEST)
+                );
+                    break;
             default:
                 $this->logger->error('Unhandled exception caught: ', [
                     'error_message' => $exception->getMessage(),
