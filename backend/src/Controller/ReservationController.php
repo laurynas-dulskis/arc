@@ -12,12 +12,10 @@ use App\Service\Reservation\ReservationQueryService;
 use App\Validator\AccessValidator;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-
 
 #[Route('/reservations')]
 class ReservationController
@@ -34,7 +32,7 @@ class ReservationController
     public function create(
         #[MapRequestPayload]
         UserReservationCreateRequest $userReservationCreateRequest,
-        UserToken $userToken
+        UserToken $userToken,
     ): JsonResponse {
         $this->reservationComandService->createReservationForUser($userToken, $userReservationCreateRequest);
 
@@ -89,7 +87,7 @@ class ReservationController
         #[MapRequestPayload(type: ReservationConfirmRequest::class)]
         array $reservationConfirmRequest,
         int $reservationId,
-        UserToken $userToken
+        UserToken $userToken,
     ): JsonResponse {
         $violations = $this->validator->validate($reservationConfirmRequest, new Assert\All([
             new Assert\Type(type: ReservationConfirmRequest::class),

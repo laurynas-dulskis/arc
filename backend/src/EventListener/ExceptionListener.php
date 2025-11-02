@@ -20,6 +20,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
+use LogicException;
 
 class ExceptionListener
 {
@@ -174,7 +175,7 @@ class ExceptionListener
                 );
 
                 break;
-                case \LogicException::class:
+            case LogicException::class:
                 $this->logger->error('Logic exception caught: ', [
                     'error_message' => $exception->getMessage(),
                     'trace' => $exception->getTraceAsString(),
@@ -185,7 +186,7 @@ class ExceptionListener
                         'error' => $exception->getMessage(),
                     ], Response::HTTP_BAD_REQUEST)
                 );
-                    break;
+                break;
             default:
                 $this->logger->error('Unhandled exception caught: ', [
                     'error_message' => $exception->getMessage(),

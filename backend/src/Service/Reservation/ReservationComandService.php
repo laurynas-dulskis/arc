@@ -11,7 +11,6 @@ use App\Entity\Ticket;
 use App\Enum\FlightClass;
 use App\Enum\ReservationStatus;
 use App\Exception\EntityNotFoundException;
-use App\Normalizer\ReservationNormalizer;
 use App\Repository\FlightRepository;
 use App\Repository\ReservationRepository;
 use App\Repository\TicketRepository;
@@ -21,7 +20,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
+use LogicException;
+use Throwable;
 
 class ReservationComandService
 {
@@ -33,14 +33,14 @@ class ReservationComandService
         private readonly TicketRepository $ticketRepository,
         private readonly MailerInterface $mailer,
         #[Autowire('%env(FORM_EMAIL)%')]
-        private readonly string $emailFromAddress
+        private readonly string $emailFromAddress,
     ) {
     }
 
     public function createReservationForUser(UserToken $userToken, UserReservationCreateRequest $userReservationCreateRequest): void
     {
         $user = $this->userRepository->findById($userToken->id);
-        if ($user === null) {
+        if (null === $user) {
             throw new EntityNotFoundException(
                 'User not found',
                 ['id' => $userToken->id]
@@ -48,7 +48,7 @@ class ReservationComandService
         }
 
         $flight = $this->flightRepository->findById($userReservationCreateRequest->flightId);
-        if ($flight === null) {
+        if (null === $flight) {
             throw new EntityNotFoundException(
                 'Flight not found',
                 ['id' => $userReservationCreateRequest->flightId]
@@ -56,54 +56,58 @@ class ReservationComandService
         }
 
         if ($flight->getSeatsAvailableEconomy() - $userReservationCreateRequest->selectedEconomy < 0) {
-            throw new \LogicException('Not enough economy seats available');
+            throw new LogicException('Not enough economy seats available');
         }
 
         if ($flight->getSeatsAvailableBusiness() - $userReservationCreateRequest->selectedBusiness < 0) {
-            throw new \LogicException('Not enough business seats available');
+            throw new LogicException('Not enough business seats available');
         }
 
         if ($flight->getSeatsAvailableFirstClass() - $userReservationCreateRequest->selectedFirstClass < 0) {
-            throw new \LogicException('Not enough first class seats available');
+            throw new LogicException('Not enough first class seats available');
         }
 
         $this->entityManager->beginTransaction();
         try {
             $reservation = (new Reservation())
                 ->setStatus(ReservationStatus::Reserved)
-                ->setUser($user);
+                ->setUser($user)
+            ;
 
             $this->entityManager->persist($reservation);
             $this->entityManager->flush();
 
-            for ($i = 0; $i < $userReservationCreateRequest->selectedEconomy; $i++) {
+            for ($i = 0; $i < $userReservationCreateRequest->selectedEconomy; ++$i) {
                 $ticket = (new Ticket())
                     ->setReservation($reservation)
                     ->setFlight($flight)
                     ->setPriceFinalCents($flight->getBasePriceCentsEconomy())
-                    ->setSeatClass(FlightClass::Economy->value);
+                    ->setSeatClass(FlightClass::Economy->value)
+                ;
 
                 $this->entityManager->persist($ticket);
                 $this->entityManager->flush();
             }
 
-            for ($i = 0; $i < $userReservationCreateRequest->selectedBusiness; $i++) {
+            for ($i = 0; $i < $userReservationCreateRequest->selectedBusiness; ++$i) {
                 $ticket = (new Ticket())
                     ->setReservation($reservation)
                     ->setFlight($flight)
                     ->setPriceFinalCents($flight->getBasePriceCentsBusiness())
-                    ->setSeatClass(FlightClass::Business->value);
+                    ->setSeatClass(FlightClass::Business->value)
+                ;
 
                 $this->entityManager->persist($ticket);
                 $this->entityManager->flush();
             }
 
-            for ($i = 0; $i < $userReservationCreateRequest->selectedFirstClass; $i++) {
+            for ($i = 0; $i < $userReservationCreateRequest->selectedFirstClass; ++$i) {
                 $ticket = (new Ticket())
                     ->setReservation($reservation)
                     ->setFlight($flight)
                     ->setPriceFinalCents($flight->getBasePriceCentsFirstClass())
-                    ->setSeatClass(FlightClass::First->value);
+                    ->setSeatClass(FlightClass::First->value)
+                ;
 
                 $this->entityManager->persist($ticket);
                 $this->entityManager->flush();
@@ -112,12 +116,13 @@ class ReservationComandService
             $flight
                 ->setSeatsAvailableEconomy($flight->getSeatsAvailableEconomy() - $userReservationCreateRequest->selectedEconomy)
                 ->setSeatsAvailableBusiness($flight->getSeatsAvailableBusiness() - $userReservationCreateRequest->selectedBusiness)
-                ->setSeatsAvailableFirstClass($flight->getSeatsAvailableFirstClass() - $userReservationCreateRequest->selectedFirstClass);
+                ->setSeatsAvailableFirstClass($flight->getSeatsAvailableFirstClass() - $userReservationCreateRequest->selectedFirstClass)
+            ;
 
             $this->entityManager->flush();
 
             $this->entityManager->commit();
-        }catch(\Throwable $exception) {
+        } catch (Throwable $exception) {
             $this->entityManager->rollback();
             throw $exception;
         }
@@ -126,16 +131,16 @@ class ReservationComandService
     public function cancel(int $reservationId, UserToken $userToken): void
     {
         $reservation = $this->reservationRepository->findByIdAndUserId($reservationId, $userToken->id);
-        if ($reservation === null) {
+        if (null === $reservation) {
             throw new EntityNotFoundException('Reservation not found', ['id' => $reservationId]);
         }
 
-        if ($reservation->getStatus() === ReservationStatus::Cancelled) {
-            throw new \LogicException('Reservation is already cancelled');
+        if (ReservationStatus::Cancelled === $reservation->getStatus()) {
+            throw new LogicException('Reservation is already cancelled');
         }
 
-        if ($reservation->getStatus() === ReservationStatus::Paid) {
-            throw new \LogicException('Reservation is already paid and cannot be cancelled');
+        if (ReservationStatus::Paid === $reservation->getStatus()) {
+            throw new LogicException('Reservation is already paid and cannot be cancelled');
         }
 
         $tickets = $this->ticketRepository->findByReservationId($reservationId);
@@ -160,7 +165,7 @@ class ReservationComandService
             $this->entityManager->flush();
 
             $this->entityManager->commit();
-        }catch(\Throwable $exception) {
+        } catch (Throwable $exception) {
             $this->entityManager->rollback();
             throw $exception;
         }
@@ -172,19 +177,19 @@ class ReservationComandService
     public function confirm(
         int $reservationId,
         UserToken $userToken,
-        array $reservationConfirmRequest
+        array $reservationConfirmRequest,
     ): void {
         $reservation = $this->reservationRepository->findByIdAndUserId($reservationId, $userToken->id);
-        if ($reservation === null) {
+        if (null === $reservation) {
             throw new EntityNotFoundException('Reservation not found', ['id' => $reservationId]);
         }
 
-        if ($reservation->getStatus() === ReservationStatus::Cancelled) {
-            throw new \LogicException('Reservation is already cancelled');
+        if (ReservationStatus::Cancelled === $reservation->getStatus()) {
+            throw new LogicException('Reservation is already cancelled');
         }
 
-        if ($reservation->getStatus() === ReservationStatus::Paid) {
-            throw new \LogicException('Reservation is already paid and cannot be cancelled');
+        if (ReservationStatus::Paid === $reservation->getStatus()) {
+            throw new LogicException('Reservation is already paid and cannot be cancelled');
         }
 
         $this->entityManager->beginTransaction();
@@ -192,13 +197,14 @@ class ReservationComandService
             foreach ($reservationConfirmRequest as $request) {
                 $ticket = $this->ticketRepository->findByTicketId($request->ticketId);
 
-                if ($ticket === null || $ticket->getReservation()->getId() !== $reservation->getId()) {
+                if (null === $ticket || $ticket->getReservation()->getId() !== $reservation->getId()) {
                     throw new EntityNotFoundException('Ticket not found for this reservation', ['id' => $request->ticketId]);
                 }
 
                 $ticket
                     ->setPassengerName($request->passengerName)
-                    ->setPassengerDob($request->passengerDob);
+                    ->setPassengerDob($request->passengerDob)
+                ;
 
                 $this->entityManager->flush();
             }
@@ -215,13 +221,14 @@ class ReservationComandService
                     'username' => $userToken->name,
                     'reservationId' => $reservation->getId(),
                     'ticketCount' => count($reservationConfirmRequest),
-                    'passengerNames' => array_map(fn($r) => $r->passengerName, $reservationConfirmRequest)
-                ]);
+                    'passengerNames' => array_map(static fn ($r) => $r->passengerName, $reservationConfirmRequest),
+                ])
+            ;
 
             $this->mailer->send($email);
 
             $this->entityManager->commit();
-        }catch(\Throwable $exception) {
+        } catch (Throwable $exception) {
             $this->entityManager->rollback();
 
             throw $exception;

@@ -41,7 +41,7 @@ class FlightQueryService
     public function getAllFlightsPagesCount(FlightFilterRequest $request): array
     {
         return [
-            'pages' => $this->flightRepository->findAllFlightsPagesCount($request)
+            'pages' => $this->flightRepository->findAllFlightsPagesCount($request),
         ];
     }
 }

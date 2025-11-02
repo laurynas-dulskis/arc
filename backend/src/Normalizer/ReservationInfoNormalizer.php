@@ -23,7 +23,7 @@ class ReservationInfoNormalizer
                 'id' => $ticket->getId(),
                 'passengerName' => $ticket->getPassengerName(),
                 'class' => $ticket->getSeatClass(),
-                'passengerDob' =>$ticket->getPassengerDob()?->format(DATE_ATOM),
+                'passengerDob' => $ticket->getPassengerDob()?->format(DATE_ATOM),
                 'price' => $ticket->getPriceFinalCents(),
             ];
         }
@@ -39,7 +39,7 @@ class ReservationInfoNormalizer
             'numberOfLayovers' => $flight->getNumberOfLayovers(),
             'flightNumber' => $flight->getFlightNumber(),
             'reservationExpiryTime' => $reservation->getCreatedAt()->modify('+3 hours')->format(DATE_ATOM),
-            'tickets' => $ticketsData
+            'tickets' => $ticketsData,
         ];
     }
 }

@@ -10,7 +10,6 @@ use App\Normalizer\ReservationNormalizer;
 use App\Repository\ReservationRepository;
 use App\Repository\TicketRepository;
 use App\Security\UserToken;
-use Symfony\Component\HttpFoundation\JsonResponse;
 
 class ReservationQueryService
 {
@@ -30,7 +29,7 @@ class ReservationQueryService
         foreach ($reservations as $reservation) {
             $tickets = $this->ticketRepository->findByReservationId($reservation->getId());
 
-            if ($tickets !== []) {
+            if ([] !== $tickets) {
                 $flight = $tickets[0]->getFlight();
 
                 $data[] = $this->reservationNormalizer->normalize($reservation, $flight);
@@ -48,7 +47,7 @@ class ReservationQueryService
         foreach ($reservations as $reservation) {
             $tickets = $this->ticketRepository->findByReservationId($reservation->getId());
 
-            if ($tickets !== []) {
+            if ([] !== $tickets) {
                 $flight = $tickets[0]->getFlight();
 
                 $data[] = $this->reservationNormalizer->normalize($reservation, $flight);
@@ -61,7 +60,7 @@ class ReservationQueryService
     public function getInfo(int $reservationId, UserToken $userToken): array
     {
         $reservation = $this->reservationRepository->findByIdAndUserId($reservationId, $userToken->id);
-        if ($reservation === null) {
+        if (null === $reservation) {
             throw new EntityNotFoundException('Reservation not found', ['id' => $reservationId]);
         }
 
@@ -69,6 +68,5 @@ class ReservationQueryService
         $flight = $tickets[0]->getFlight();
 
         return $this->reservationInfoNormalizer->normalize($reservation, $flight, $tickets);
-
     }
 }
