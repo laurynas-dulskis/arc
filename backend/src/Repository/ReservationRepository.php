@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Reservation;
+use App\Enum\ReservationStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -35,6 +36,18 @@ class ReservationRepository extends ServiceEntityRepository
             ->setParameter('userId', $userId)
             ->getQuery()
             ->getOneOrNullResult()
+        ;
+    }
+
+    public function findOldReservationsToClean(): array
+    {
+        return $this->createQueryBuilder('r')
+            ->where('r.createdAt < :cutoffDate')
+            ->andWhere('r.status = :status')
+            ->setParameter('cutoffDate', new \DateTimeImmutable('-3 hours'))
+            ->setParameter('status', ReservationStatus::Reserved->value)
+            ->getQuery()
+            ->getResult()
         ;
     }
 }

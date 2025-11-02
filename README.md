@@ -87,4 +87,3 @@ This project consists of a full-stack application with the following components:
 ```
 
 fix flights creation
-addd comand to run

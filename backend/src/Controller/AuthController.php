@@ -47,7 +47,7 @@ class AuthController
             return $response;
         } catch (Throwable $e) {
             return new JsonRedirectResponse(
-                $this->portalUrl.'?error='.urlencode('You dont have access to this application.'),
+                $this->portalUrl.'?error='.urlencode('Your account is disabled'),
             );
         }
     }
