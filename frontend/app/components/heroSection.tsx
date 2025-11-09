@@ -33,7 +33,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ isSigningIn, handleGoogleSign
             <div className="w-full max-w-5xl flex justify-end mb-4">
                 {getAccessTokenData() !== null ? (
                     <div>
-                        <div className="mb-4 text-gray-700 text-right">
+                        <div className="mb-4 text-gray-700 text-right cursor-grab" onClick={() => navigate(ROUTES.PROFILE)}>
                             <span className="italic">Logged in as:</span>{" "}
                             <span className="font-semibold">
                                 {getAccessTokenData()?.name} {getAccessTokenData()?.surname}

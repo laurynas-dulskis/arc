@@ -23,4 +23,7 @@ export const API_ENDPOINTS = {
   BOARDING: {
     ALL: `${API_BASE_URL}/boarding/all`,
   },
+  HISTORY: {
+    MY: `${API_BASE_URL}/history/my`,
+  },
 } as const;

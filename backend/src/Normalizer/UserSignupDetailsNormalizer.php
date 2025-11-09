@@ -14,6 +14,7 @@ class UserSignupDetailsNormalizer
             'email' => $user->getEmail(),
             'firstName' => $user->getFirstName(),
             'lastName' => $user->getLastName(),
+            'phoneNumber' => $user->getPhoneNumber(),
         ];
     }
 }

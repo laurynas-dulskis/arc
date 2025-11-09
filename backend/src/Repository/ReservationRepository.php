@@ -16,6 +16,25 @@ class ReservationRepository extends ServiceEntityRepository
         parent::__construct($registry, Reservation::class);
     }
 
+    /**
+     * @return Reservation[]
+     */
+    public function findHistoricByUserId(int $userId): array
+    {
+        return $this->createQueryBuilder('r')
+            ->where('r.user = :userId')
+            ->andWhere('r.status IN (:statuses)')
+            ->andWhere('r.createdAt > :cutoffDate')
+            ->setParameter('userId', $userId)
+            ->setParameter('statuses', [
+                ReservationStatus::Paid->value,
+            ])
+            ->setParameter('cutoffDate', new \DateTimeImmutable('-5 year'))
+            ->orderBy('r.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function findById(string $id): ?Reservation
     {
         return $this->createQueryBuilder('r')
