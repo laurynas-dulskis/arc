@@ -6,6 +6,7 @@ import {
     getReservationById,    
 } from "~/clients/reservationsClient";
 import Button from "~/components/button";
+import ConfirmationModal from "~/components/confirmationModal";
 import Spinner from "~/components/spinner";
 import UserNavigationHeader from "~/components/userNavigationHeader";
 import type { Reservation } from "~/model/reservation";
@@ -16,6 +17,7 @@ export function ReservationsDetailsPage() {
     const [isFetchingReservation, setIsFetchingReservation] = React.useState(true);
     const [isProcessing, setIsProcessing] = React.useState(false);
     const [reservation, setReservation] = React.useState<ReservationInfo | null>(null);
+    const [windowOpen, setWindowOpen] = React.useState(false);
 
     React.useEffect(() => {
         setIsFetchingReservation(true);
@@ -248,7 +250,7 @@ export function ReservationsDetailsPage() {
 
                     <div className="flex gap-3">
                         <Button 
-                        onClick={handleCancel} 
+                        onClick={() => setWindowOpen(true)} 
                         disabled={!canModify || isProcessing} 
                         color="bg-red-600" 
                         text={isProcessing ? "Processing..." : "Cancel reservation"} 
@@ -262,6 +264,17 @@ export function ReservationsDetailsPage() {
                     </div>
                 </div>
             </div>
+
+            <ConfirmationModal
+                isOpen={windowOpen}
+                onConfirm={handleCancel}
+                onCancel={() => {
+                    setWindowOpen(false);
+                }}
+                title="Confirm Cancellation"
+                message="Are you sure you want to cancel this flight?"
+                isLoading={isProcessing}
+            />
         </div>
     );
 }

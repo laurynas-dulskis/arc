@@ -33,6 +33,15 @@ const FlightsList: React.FC<FlightsListProps> = ({ flights, isFetchingFlights, n
         );
     };
 
+    if (flights.length === 0 && !isFetchingFlights) {
+        return (
+            <section className="flex flex-col items-center w-full max-w-5xl mt-10 px-6">
+                <p className="text-gray-600 text-xl pt-8">No flights found matching your criteria.</p>
+                <p className="text-gray-500 mt-2">Try adjusting your search parameters.</p>
+            </section>
+        );
+    }
+
     return (
         <section className="flex flex-col items-start w-full max-w-5xl mt-10 px-6">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">
