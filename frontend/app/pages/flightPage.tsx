@@ -295,7 +295,18 @@ export function FlightPage() {
                                     />
                                 </div>
 
-                                <div className="ml-auto">
+                                <div className="ml-auto flex items-center space-x-3">
+                                    {isAgent ? (
+                                        <Button
+                                            color="bg-blue-600"
+                                            onClick={() => {
+                                                navigate(
+                                                    generatePath(ROUTES.PASSENGERS, { id: String(flight.id) })
+                                                );
+                                            }}
+                                            text="Passengers"
+                                        />
+                                    ) : null}
                                     {isAgent ? (
                                         <Button
                                             color="bg-blue-600"

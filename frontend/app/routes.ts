@@ -13,4 +13,5 @@ export default ([
   route(ROUTES.RESERVATION_DETAILS, "pages/reservationDetailsPage.tsx"),
   route(ROUTES.PAYMENT, "pages/payment.tsx"),
   route(ROUTES.BOARDING, "pages/boarding.tsx"),
+  route(ROUTES.PASSENGERS, "pages/passengers.tsx"),
 ] as RouteConfig);

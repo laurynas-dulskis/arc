@@ -10,4 +10,5 @@ export const ROUTES = {
   RESERVATION_DETAILS: '/reservations/:id',
   PAYMENT: '/payment',
   BOARDING: '/boarding/:id',
+  PASSENGERS: '/passengers/:id',
 } as const;
