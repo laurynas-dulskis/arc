@@ -97,10 +97,10 @@ class ReservationController
             return new JsonResponse(['errors' => (string) $violations], Response::HTTP_BAD_REQUEST);
         }
 
-        $this->reservationComandService->confirm($reservationId, $userToken, $reservationConfirmRequest);
-
         return new JsonResponse(
-            [],
+            [
+                'paymentUrl' => $this->reservationComandService->confirm($reservationId, $userToken, $reservationConfirmRequest)
+            ],
             Response::HTTP_OK
         );
     }

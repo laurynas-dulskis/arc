@@ -50,4 +50,17 @@ class AccessValidator
             throw new UnauthorizedHttpException('Bearer', 'Access denied');
         }
     }
+
+    public function validateIsAgent(UserToken $token): void
+    {
+        if (UserRole::BoardingAgent === $token->role) {
+          return;
+        }
+
+        if (UserRole::Admin === $token->role) {
+            return;
+        }
+
+        throw new UnauthorizedHttpException('Bearer', 'Access denied');
+    }
 }

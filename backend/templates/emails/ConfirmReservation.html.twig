@@ -1,16 +1,20 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <h1>Reservation Confirmed</h1>
+    <h1>Reservation {{ status }}</h1>
     <p>Hello {{ username }},</p>
-    <p>Your reservation with ID <strong>{{ reservationId }}</strong> has been confirmed.</p>
+    <p>Your reservation with ID <strong>{{ reservationId }}</strong> has been {{ status }}.</p>
     <p>Details:</p>
     <ul>
         <li>Number of Tickets: {{ ticketCount }}</li>
-        <li>Passenger Names:</li>
+        <li>Tickets:</li>
         <ul>
-            {% for name in passengerNames %}
-                <li>{{ name }}</li>
+            {% for ticket in tickets %}
+                <li>
+                    <strong>Name:</strong> {{ ticket.passengerName }}<br>
+                    <strong>Seat Class:</strong> {{ ticket.seatClass }}<br>
+                    <strong>Price:</strong> {{ ticket.priceFinalCents }} EUR
+                </li>
             {% endfor %}
         </ul>
     </ul>

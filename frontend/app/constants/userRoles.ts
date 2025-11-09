@@ -1,5 +1,6 @@
 export enum UserRoles {
     ADMIN = 'Admin',
     USER = 'User',
-    DISABLED = 'Disabled'
+    DISABLED = 'Disabled',
+    BOARDING_AGENT = 'Boarding agent'
 }

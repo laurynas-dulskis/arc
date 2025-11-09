@@ -17,9 +17,11 @@ use App\Repository\TicketRepository;
 use App\Repository\UserRepository;
 use App\Security\UserToken;
 use Doctrine\ORM\EntityManagerInterface;
+use Stripe\Stripe;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\MailerInterface;
+use Stripe\Checkout\Session;
 use LogicException;
 use Throwable;
 
@@ -31,9 +33,6 @@ class ReservationComandService
         private readonly EntityManagerInterface $entityManager,
         private readonly ReservationRepository $reservationRepository,
         private readonly TicketRepository $ticketRepository,
-        private readonly MailerInterface $mailer,
-        #[Autowire('%env(FORM_EMAIL)%')]
-        private readonly string $emailFromAddress,
     ) {
     }
 
@@ -178,7 +177,7 @@ class ReservationComandService
         int $reservationId,
         UserToken $userToken,
         array $reservationConfirmRequest,
-    ): void {
+    ): string {
         $reservation = $this->reservationRepository->findByIdAndUserId($reservationId, $userToken->id);
         if (null === $reservation) {
             throw new EntityNotFoundException('Reservation not found', ['id' => $reservationId]);
@@ -192,14 +191,20 @@ class ReservationComandService
             throw new LogicException('Reservation is already paid and cannot be cancelled');
         }
 
+
         $this->entityManager->beginTransaction();
+        $transactionActive = true;
+
         try {
+            $toPayCents = 0;
             foreach ($reservationConfirmRequest as $request) {
                 $ticket = $this->ticketRepository->findByTicketId($request->ticketId);
 
                 if (null === $ticket || $ticket->getReservation()->getId() !== $reservation->getId()) {
                     throw new EntityNotFoundException('Ticket not found for this reservation', ['id' => $request->ticketId]);
                 }
+
+                $toPayCents += $ticket->getPriceFinalCents();
 
                 $ticket
                     ->setPassengerName($request->passengerName)
@@ -209,27 +214,40 @@ class ReservationComandService
                 $this->entityManager->flush();
             }
 
-            $reservation->setStatus(ReservationStatus::Paid);
-            $this->entityManager->flush();
-
-            $email = (new TemplatedEmail())
-                ->from($this->emailFromAddress)
-                ->to($userToken->email)
-                ->subject('Reservation Confirmed')
-                ->htmlTemplate('emails/ConfirmReservation.html.twig')
-                ->context([
-                    'username' => $userToken->name,
-                    'reservationId' => $reservation->getId(),
-                    'ticketCount' => count($reservationConfirmRequest),
-                    'passengerNames' => array_map(static fn ($r) => $r->passengerName, $reservationConfirmRequest),
-                ])
-            ;
-
-            $this->mailer->send($email);
-
             $this->entityManager->commit();
+            $transactionActive = false;
+
+            Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
+
+            $orderId = $reservation->getId();
+
+            $session = Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => 'eur',
+                        'product_data' => [
+                            'name' => 'Flight Reservation #' . $orderId,
+                        ],
+                        'unit_amount' => $toPayCents,
+                    ],
+                    'quantity' => 1,
+                ]],
+                'mode' => 'payment',
+                'success_url' => 'http://localhost:5173/payment?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => 'http://localhost:5173/',
+                'client_reference_id' => $orderId,
+                'metadata' => [
+                    'order_id' => $orderId,
+                    'user_id' => $userToken->id,
+                ],
+            ]);
+
+            return $session->url;
         } catch (Throwable $exception) {
-            $this->entityManager->rollback();
+            if ($transactionActive) {
+                $this->entityManager->rollback();
+            }
 
             throw $exception;
         }

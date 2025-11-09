@@ -16,5 +16,11 @@ export const API_ENDPOINTS = {
   RESERVATIONS: {
     ALL: `${API_BASE_URL}/reservations`,
     MY: `${API_BASE_URL}/reservations/my`,
-  }
+  },
+  PAYMENTS: {
+    ALL: `${API_BASE_URL}/payments`,
+  },
+  BOARDING: {
+    ALL: `${API_BASE_URL}/boarding/all`,
+  },
 } as const;

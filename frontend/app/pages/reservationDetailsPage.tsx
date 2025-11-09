@@ -1,4 +1,5 @@
 import React from "react";
+import { redirect } from "react-router";
 import { getFlightById } from "~/clients/flightsClient";
 import {
     cancelReservation,
@@ -92,10 +93,9 @@ export function ReservationsDetailsPage() {
 
         setIsProcessing(true);
         try {
-            await confirmAndPay(reservation.id, reservation.tickets);
+            let paymentResult = await confirmAndPay(reservation.id, reservation.tickets);
 
-            showToast("Payment successful — reservation confirmed", "success");
-            window.location.href = "/reservations";
+            window.location.href = paymentResult.paymentUrl;
         } catch (err) {
             console.error(err);
             showToast("Payment failed", "error");

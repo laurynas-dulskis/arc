@@ -1,14 +1,18 @@
 import React from "react";
+import { generatePath, useNavigate } from "react-router";
 import { getFlightById } from "~/clients/flightsClient";
 import { reserveSeats } from "~/clients/reservationsClient";
 import Button from "~/components/button";
 import Spinner from "~/components/spinner";
 import UserNavigationHeader from "~/components/userNavigationHeader";
+import { ROUTES } from "~/constants/routes";
 import type { Flight } from "~/model/flight";
-import { ensureLoggedIn } from "~/utils/authUtils";
+import { ensureLoggedIn, isBoardingAgent } from "~/utils/authUtils";
 import { showToast } from "~/utils/toastUtils";
 
 export function FlightPage() {
+    const navigate = useNavigate();
+    
     const [isLoggedIn, setIsLoggedIn] = React.useState(false);
     const [flight, setFlight] = React.useState<Flight | null>(null);
     const [isFetchingFlight, setIsFetchingFlight] = React.useState(false);
@@ -19,6 +23,7 @@ export function FlightPage() {
 
     const [errors, setErrors] = React.useState<string | null>(null);
     const [isReserving, setIsReserving] = React.useState(false);
+    const [isAgent, setIsAgent] = React.useState(false);
 
     const fetchFlight = async () => {
         setIsFetchingFlight(true);
@@ -43,6 +48,7 @@ export function FlightPage() {
 
     React.useEffect(() => {
         setIsLoggedIn(ensureLoggedIn());
+        setIsAgent(isBoardingAgent());
         fetchFlight();
     }, []);
 
@@ -258,15 +264,16 @@ export function FlightPage() {
                             <div className="mt-4 text-sm text-red-600">{errors}</div>
                         )}
 
-                        <div className="mt-6 flex items-center justify-between">
-                            <div>
-                                <div className="text-sm text-gray-500">Selected seats</div>
-                                <div className="font-medium">
-                                    {totalSelected} seat(s) — {formatPrice(totalPriceCents)}
-                                </div>
-                                <div className="flex pt-6 items-center space-x-3">
+                        <div className="mt-6">
+                            <div className="text-sm text-gray-500">Selected seats</div>
+                            <div className="font-medium">
+                                {totalSelected} seat(s) — {formatPrice(totalPriceCents)}
+                            </div>
+
+                            <div className="flex pt-6 items-center w-full">
+                                <div className="flex items-center space-x-3">
                                     <Button
-                                    color="bg-blue-600"
+                                        color="bg-blue-600"
                                         onClick={onReserve}
                                         disabled={
                                             isReserving ||
@@ -277,7 +284,7 @@ export function FlightPage() {
                                         text={isReserving ? "Reserving..." : "Reserve"}
                                     />
                                     <Button
-                                    color="bg-blue-600"
+                                        color="bg-blue-600"
                                         onClick={() => {
                                             setSelectedEconomy(0);
                                             setSelectedBusiness(0);
@@ -286,6 +293,20 @@ export function FlightPage() {
                                         }}
                                         text="Reset"
                                     />
+                                </div>
+
+                                <div className="ml-auto">
+                                    {isAgent ? (
+                                        <Button
+                                            color="bg-blue-600"
+                                            onClick={() => {
+                                                navigate(
+                                                    generatePath(ROUTES.BOARDING, { id: String(flight.id) })
+                                                );
+                                            }}
+                                            text="Boarding passes"
+                                        />
+                                    ) : null}
                                 </div>
                             </div>
                         </div>

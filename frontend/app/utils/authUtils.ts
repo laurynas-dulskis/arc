@@ -89,3 +89,19 @@ export function ensureLoggedIn(): boolean {
 
     return true;
 }
+
+export function isBoardingAgent(): boolean {
+    return getAccessTokenData()?.role === UserRoles.BOARDING_AGENT || isAdmin();
+}
+
+export function ensureAgent(): boolean {
+    if (!isBoardingAgent()) {
+        showToast("Access denied. Boarding agents only.", "error");
+
+        window.location.href = ROUTES.HOME;
+
+        return false;
+    }
+
+    return true;
+}

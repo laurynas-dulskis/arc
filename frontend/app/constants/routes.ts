@@ -8,4 +8,6 @@ export const ROUTES = {
   FLIGHT: '/flights/:id',
   RESERVATIONS: '/reservations',
   RESERVATION_DETAILS: '/reservations/:id',
+  PAYMENT: '/payment',
+  BOARDING: '/boarding/:id',
 } as const;
