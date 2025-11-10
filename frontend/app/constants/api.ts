@@ -26,4 +26,7 @@ export const API_ENDPOINTS = {
   HISTORY: {
     MY: `${API_BASE_URL}/history/my`,
   },
+  REPORTS: {
+    GENERATE: `${API_BASE_URL}/reports`,
+  },
 } as const;

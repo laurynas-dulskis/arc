@@ -12,4 +12,5 @@ export const ROUTES = {
   BOARDING: '/boarding/:id',
   PASSENGERS: '/passengers/:id',
   PROFILE: '/profile',
+  REPORTS: '/admin/reports',
 } as const;

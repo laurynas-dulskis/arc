@@ -43,6 +43,13 @@ export function AdminPanel() {
                 }}
             />
             <Button
+                text="Reports"
+                color="bg-blue-600"
+                onClick={() => {
+                window.location.href = ROUTES.REPORTS;
+                }}
+            />
+            <Button
                 text="Logout"
                 color="bg-red-600"
                 onClick={logout}

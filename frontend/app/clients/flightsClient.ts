@@ -2,10 +2,11 @@ import axios from 'axios';
 import { API_ENDPOINTS } from '~/constants/api';
 import { handleBackendError } from '~/utils/errorUtils';
 import { showToast } from '~/utils/toastUtils';
+import type { FlightSearchParams } from "../model/searchParams";
 
-export const getAllFlights = async (params?: { from?: string; to?: string; startDate?: string; endDate?: string, page?: number }) => {
+export const getAllFlights = async (params?: Partial<FlightSearchParams>) => {
     try {
-        const filteredParams: { [key: string]: string|number } = {};
+        const filteredParams: { [key: string]: string | number } = {};
         if (params) {
             for (const [key, value] of Object.entries(params)) {
                 if (value) {
@@ -53,9 +54,9 @@ export const getFlightById = async (id: string | number) => {
     }
 };
 
-export const getAllFlightsPagesCount = async (params?: { from?: string; to?: string; startDate?: string; endDate?: string, page?: number }) => {
+export const getAllFlightsPagesCount = async (params?: Partial<FlightSearchParams>) => {
     try {
-        const filteredParams: { [key: string]: string|number } = {};
+        const filteredParams: { [key: string]: string | number } = {};
         if (params) {
             for (const [key, value] of Object.entries(params)) {
                 if (value) {

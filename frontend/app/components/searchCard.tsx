@@ -3,22 +3,13 @@ import Button from "./button";
 import { showToast } from "../utils/toastUtils";
 import { Range } from "react-range";
 import {FlightClass} from "~/constants/class";
+import type { FlightSearchParams } from "../model/searchParams";
 
 interface SearchCardProps {
-    searchParams: {
-        from: string;
-        to: string;
-        dateFrom: string;
-        dateTo: string;
-        page: number;
-        class: string;
-        seatCount: number;
-        priceRange: string;
-        sort: string;
-    };
-    setSearchParams: React.Dispatch<React.SetStateAction<any>>;
+    searchParams: FlightSearchParams;
+    setSearchParams: React.Dispatch<React.SetStateAction<FlightSearchParams>>;
     setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
-    handleSearch: () => void;
+    handleSearch: (overrideParams?: Partial<FlightSearchParams>) => void;
     isFetchingFlights: boolean;
     maxPrice: number;
 }
@@ -99,7 +90,8 @@ const SearchCard: React.FC<SearchCardProps> = ({ searchParams, setSearchParams, 
                         color="bg-blue-600"
                         onClick={()  => {
                             setCurrentPage(1);
-                            handleSearch();
+                            // Pass current params explicitly to avoid stale state and ensure persistence
+                            handleSearch({ ...searchParams, page: 1 });
                         }}
                         disabled={isFetchingFlights}
                     />

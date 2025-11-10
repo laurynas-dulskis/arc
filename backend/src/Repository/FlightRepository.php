@@ -35,6 +35,21 @@ class FlightRepository extends ServiceEntityRepository
     /**
      * @return Flight[]
      */
+    public function findFlightsBetweenDates(DateTimeImmutable $from, DateTimeImmutable $to): array{
+        return $this->createQueryBuilder('f')
+            ->andWhere('f.departureTime >= :from')
+            ->andWhere('f.arrivalTime <= :to')
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->orderBy('f.departureTime', 'DESC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+    /**
+     * @return Flight[]
+     */
     public function findAllFlights(FlightFilterRequest $request, int $limit = 10): array
     {
         $queryBuilder = $this->createQueryBuilder('f');

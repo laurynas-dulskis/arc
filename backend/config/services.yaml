@@ -35,3 +35,7 @@ services:
     App\EventListener\OrderListener:
         tags:
             - { name: doctrine.event_listener, event: preUpdate }
+
+    App\EventListener\FlightListener:
+        tags:
+            - { name: doctrine.event_listener, event: preUpdate }

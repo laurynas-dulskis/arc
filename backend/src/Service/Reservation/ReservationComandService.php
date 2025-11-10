@@ -11,6 +11,7 @@ use App\Entity\Ticket;
 use App\Enum\FlightClass;
 use App\Enum\ReservationStatus;
 use App\Exception\EntityNotFoundException;
+use App\Provider\PriceProvider;
 use App\Repository\FlightRepository;
 use App\Repository\ReservationRepository;
 use App\Repository\TicketRepository;
@@ -18,9 +19,6 @@ use App\Repository\UserRepository;
 use App\Security\UserToken;
 use Doctrine\ORM\EntityManagerInterface;
 use Stripe\Stripe;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\Mailer\MailerInterface;
 use Stripe\Checkout\Session;
 use LogicException;
 use Throwable;
@@ -33,6 +31,7 @@ class ReservationComandService
         private readonly EntityManagerInterface $entityManager,
         private readonly ReservationRepository $reservationRepository,
         private readonly TicketRepository $ticketRepository,
+        private readonly PriceProvider $priceProvider,
     ) {
     }
 
@@ -80,7 +79,7 @@ class ReservationComandService
                 $ticket = (new Ticket())
                     ->setReservation($reservation)
                     ->setFlight($flight)
-                    ->setPriceFinalCents($flight->getBasePriceCentsEconomy())
+                    ->setPriceFinalCents($this->priceProvider->getEconomyPrice($flight))
                     ->setSeatClass(FlightClass::Economy->value)
                 ;
 
@@ -92,7 +91,7 @@ class ReservationComandService
                 $ticket = (new Ticket())
                     ->setReservation($reservation)
                     ->setFlight($flight)
-                    ->setPriceFinalCents($flight->getBasePriceCentsBusiness())
+                    ->setPriceFinalCents($this->priceProvider->getBusinessPrice($flight))
                     ->setSeatClass(FlightClass::Business->value)
                 ;
 
@@ -104,7 +103,7 @@ class ReservationComandService
                 $ticket = (new Ticket())
                     ->setReservation($reservation)
                     ->setFlight($flight)
-                    ->setPriceFinalCents($flight->getBasePriceCentsFirstClass())
+                    ->setPriceFinalCents($this->priceProvider->getBusinessPrice($flight))
                     ->setSeatClass(FlightClass::First->value)
                 ;
 

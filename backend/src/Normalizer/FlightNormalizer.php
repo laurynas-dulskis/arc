@@ -5,9 +5,16 @@ declare(strict_types=1);
 namespace App\Normalizer;
 
 use App\Entity\Flight;
+use App\Provider\PriceProvider;
 
 class FlightNormalizer
 {
+    public function __construct(
+        private readonly PriceProvider $priceProvider,
+    )
+    {
+    }
+
     public function normalize(Flight $flight): array
     {
         return [
@@ -20,9 +27,9 @@ class FlightNormalizer
             'durationMinutes' => $flight->getDurationMinutes(),
             'seatsTotal' => $flight->getSeatsTotal(),
             'numberOfLayovers' => $flight->getNumberOfLayovers(),
-            'basePriceCentsEconomy' => $flight->getBasePriceCentsEconomy(),
-            'basePriceCentsBusiness' => $flight->getBasePriceCentsBusiness(),
-            'basePriceCentsFirstClass' => $flight->getBasePriceCentsFirstClass(),
+            'basePriceCentsEconomy' => $this->priceProvider->getEconomyPrice($flight),
+            'basePriceCentsBusiness' => $this->priceProvider->getBusinessPrice($flight),
+            'basePriceCentsFirstClass' => $this->priceProvider->getFirstClassPrice($flight),
             'seatsEconomy' => $flight->getSeatsEconomy(),
             'seatsBusiness' => $flight->getSeatsBusiness(),
             'seatsFirstClass' => $flight->getSeatsFirstClass(),

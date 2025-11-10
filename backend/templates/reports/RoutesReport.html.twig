@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ reportType }}</title>
+    <style>
+        .report-container {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        .report-container .header {
+            color: #333;
+        }
+        .report-container .paragraph {
+            margin: 5px 0;
+        }
+        .report-container .box {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body class="report-container">
+<h1 class="header">{{ reportType }}</h1>
+<p class="paragraph">Generated At: {{ generatedAt }}</p>
+<p class="paragraph">Number of Flights: {{ numberOfFlights }}</p>
+
+<h2 class="header">Routes</h2>
+{% for route in routes %}
+    <div class="box">
+        <h3 class="header">Route: {{ route.route }}</h3>
+        <p class="paragraph">Flight Count: {{ route.flightCount }}</p>
+        <p class="paragraph">Total Tickets Sold: {{ route.totalTicketsSold }}</p>
+        <p class="paragraph">Total Revenue Collected: {{ route.totalRevenueCollected }}</p>
+        <p class="paragraph">Total Revenue Expected: {{ route.totalRevenueExpected }}</p>
+    </div>
+{% endfor %}
+</body>
+</html>
