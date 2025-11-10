@@ -4,6 +4,8 @@ export interface TicketInfo {
     class: string;
     passengerDob: string | null;
     price: number;
+    seat: string | null;
+    extraBags: number;
 }
 
 export interface ReservationInfo {

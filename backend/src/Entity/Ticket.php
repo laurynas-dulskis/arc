@@ -33,8 +33,8 @@ class Ticket
     #[ORM\Column(type: 'string')]
     private ?string $seatClass = null;
 
-    #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $seatNumber = null;
+    #[ORM\Column(type: 'string', nullable: true)]
+    private ?string $seatNumber = null;
 
     #[ORM\Column(type: 'integer')]
     private ?int $priceFinalCents = null;
@@ -112,12 +112,12 @@ class Ticket
         return $this;
     }
 
-    public function getSeatNumber(): ?int
+    public function getSeatNumber(): ?string
     {
         return $this->seatNumber;
     }
 
-    public function setSeatNumber(int $seatNumber): self
+    public function setSeatNumber(?string $seatNumber): self
     {
         $this->seatNumber = $seatNumber;
 

@@ -7,6 +7,7 @@ import {
     getReservationById,    
 } from "~/clients/reservationsClient";
 import Button from "~/components/button";
+import { getUnavailableSeats } from "~/clients/seatsClient";
 import ConfirmationModal from "~/components/confirmationModal";
 import Spinner from "~/components/spinner";
 import UserNavigationHeader from "~/components/userNavigationHeader";
@@ -19,6 +20,11 @@ export function ReservationsDetailsPage() {
     const [isProcessing, setIsProcessing] = React.useState(false);
     const [reservation, setReservation] = React.useState<ReservationInfo | null>(null);
     const [windowOpen, setWindowOpen] = React.useState(false);
+    const [selectedSeats, setSelectedSeats] = React.useState<Record<number, { row: number | null; letter: string | null }>>({});
+    const [seatPickerTicketId, setSeatPickerTicketId] = React.useState<number | null>(null);
+    const [seatPickerTemp, setSeatPickerTemp] = React.useState<{ row: number | null; letter: string | null } | null>(null);
+    const [backendTakenSeats, setBackendTakenSeats] = React.useState<string[]>([]);
+    const [isLoadingSeats, setIsLoadingSeats] = React.useState(false);
 
     React.useEffect(() => {
         setIsFetchingReservation(true);
@@ -31,7 +37,16 @@ export function ReservationsDetailsPage() {
                 if (!data) {
                     showToast("No reservation found", "info");
                 } else {
-                    setReservation(data);
+                    // Ensure default values for optional frontend-managed fields
+                    const normalized = {
+                        ...data,
+                        tickets: data.tickets.map((t: any) => ({
+                            ...t,
+                            seat: typeof t.seat === 'string' ? t.seat : null,
+                            extraBags: Number.isFinite(t.extraBags) ? t.extraBags : 0,
+                        })),
+                    } as ReservationInfo;
+                    setReservation(normalized);
                 }
             })
             .catch((err) => {
@@ -43,6 +58,30 @@ export function ReservationsDetailsPage() {
             });
     }, []);
 
+    React.useEffect(() => {
+        async function fetchSeats() {
+            if (!reservation) return;
+
+            const flightIdCandidate = reservation.id;
+            setIsLoadingSeats(true);
+            try {
+                const taken = await getUnavailableSeats(flightIdCandidate);
+                if (Array.isArray(taken)) {
+                    const cleaned = taken
+                        .map((s) => String(s).toUpperCase())
+                        .filter((s) => /^([1-9]|[12]\d|3[01])[A-F]$/.test(s));
+                    setBackendTakenSeats(cleaned);
+                }
+            } catch (e) {
+                // Non-fatal; keep local selection logic.
+                console.warn('Failed fetching backend taken seats', e);
+            } finally {
+                setIsLoadingSeats(false);
+            }
+        }
+        fetchSeats();
+    }, [reservation]);
+
     const flightHasHappened = React.useMemo(() => {
         if (!reservation) return false;
         const dep = new Date(reservation.departureTime);
@@ -53,6 +92,30 @@ export function ReservationsDetailsPage() {
         !!reservation && reservation.status === "Reserved" && !flightHasHappened;
 
     const todayStr = React.useMemo(() => new Date().toISOString().split("T")[0], []);
+    const seatLetters = React.useMemo(() => ["A", "B", "C", "D", "E", "F"], []);
+    const seatRows = React.useMemo(() => Array.from({ length: 31 }, (_, i) => i + 1), []);
+
+    const selectedSeatCount = React.useMemo(() => {
+        if (!reservation) return 0;
+        return reservation.tickets.reduce((acc, t) => {
+            const s = selectedSeats[t.id];
+            const hasLocal = !!(s && s.row && s.letter);
+            const persistedSeat = (t as any).seat ? String((t as any).seat).toUpperCase() : null;
+            const hasPersisted = !hasLocal && !!(persistedSeat && /^([1-9]|[12]\d|3[01])[A-F]$/.test(persistedSeat));
+            return acc + (hasLocal || hasPersisted ? 1 : 0);
+        }, 0);
+    }, [reservation, selectedSeats]);
+
+    const seatSelectionValid = React.useMemo(() => {
+        if (!reservation) return true;
+        return reservation.tickets.every((t) => {
+            const s = selectedSeats[t.id];
+            if (!s) return true;
+            const hasRow = !!s.row;
+            const hasLetter = !!s.letter;
+            return (hasRow && hasLetter) || (!hasRow && !hasLetter);
+        });
+    }, [reservation, selectedSeats]);
 
     const allPassengersFilled = React.useMemo(() => {
         if (!reservation) return false;
@@ -80,6 +143,65 @@ export function ReservationsDetailsPage() {
         });
     }
 
+    function updateSeat(ticketId: number, patch: Partial<{ row: number | null; letter: string | null }>) {
+        setSelectedSeats((prev) => ({
+            ...prev,
+            [ticketId]: { row: prev[ticketId]?.row ?? null, letter: prev[ticketId]?.letter ?? null, ...patch },
+        }));
+    }
+
+    function openSeatPicker(ticketId: number) {
+        setSeatPickerTicketId(ticketId);
+        const current = selectedSeats[ticketId] ?? { row: null, letter: null };
+        setSeatPickerTemp({ ...current });
+    }
+
+    function closeSeatPicker() {
+        setSeatPickerTicketId(null);
+        setSeatPickerTemp(null);
+    }
+
+    function confirmSeatPicker() {
+        if (seatPickerTicketId == null || !seatPickerTemp) return;
+        // Prevent selecting a seat already chosen by another ticket
+        if (seatPickerTemp.row && seatPickerTemp.letter && isSeatTaken(seatPickerTemp.row, seatPickerTemp.letter, seatPickerTicketId)) {
+            showToast("This seat is already selected for another ticket. Please choose a different one.", "info");
+            return;
+        }
+        updateSeat(seatPickerTicketId, { row: seatPickerTemp.row ?? null, letter: seatPickerTemp.letter ?? null });
+        // Also reflect seat code in reservation.tickets for payload convenience
+        if (reservation) {
+            const code = seatPickerTemp.row && seatPickerTemp.letter ? `${seatPickerTemp.row}${seatPickerTemp.letter}` : null;
+            setReservation({
+                ...reservation,
+                tickets: reservation.tickets.map((t) => t.id === seatPickerTicketId ? { ...t, seat: code } : t),
+            });
+        }
+        closeSeatPicker();
+    }
+
+    function clearSeat(ticketId: number) {
+        updateSeat(ticketId, { row: null, letter: null });
+        if (reservation) {
+            setReservation({
+                ...reservation,
+                tickets: reservation.tickets.map((t) => t.id === ticketId ? { ...t, seat: null } : t),
+            });
+        }
+    }
+
+    function isSeatTaken(row: number, letter: string, excludeTicketId?: number): boolean {
+        for (const [tidStr, seat] of Object.entries(selectedSeats)) {
+            const tid = Number(tidStr);
+            if (excludeTicketId && tid === excludeTicketId) continue;
+            if (seat && seat.row === row && seat.letter === letter) return true;
+        }
+        // Include backend taken seats with code like "12C"
+        const code = `${row}${String(letter).toUpperCase()}`;
+        if (backendTakenSeats.includes(code)) return true;
+        return false;
+    }
+
     async function handlePay() {
         if (!reservation) return;
         if (!canModify) {
@@ -90,10 +212,25 @@ export function ReservationsDetailsPage() {
             showToast("Please fill in all passenger names and valid dates of birth before paying.", "info");
             return;
         }
+        if (!seatSelectionValid) {
+            showToast("Please complete seat selection: choose both row and letter, or clear the selection.", "info");
+            return;
+        }
 
         setIsProcessing(true);
         try {
-            let paymentResult = await confirmAndPay(reservation.id, reservation.tickets);
+            // Enrich tickets with seat from selectedSeats if needed and ensure extraBags defaults
+            const enriched = reservation.tickets.map((t: any) => {
+                const s = selectedSeats[t.id];
+                const seatCode = s && s.row && s.letter ? `${s.row}${s.letter}` : (typeof t.seat === 'string' ? t.seat : null);
+                return {
+                    ...t,
+                    seat: seatCode,
+                    extraBags: Number.isFinite(t.extraBags) ? t.extraBags : 0,
+                };
+            });
+
+            let paymentResult = await confirmAndPay(reservation.id, enriched);
 
             window.location.href = paymentResult.paymentUrl;
         } catch (err) {
@@ -146,6 +283,9 @@ export function ReservationsDetailsPage() {
     }
 
     const totalPrice = reservation.tickets.reduce((s, t) => s + (t.price || 0), 0);
+    const seatFeePerSelectionCents = 2500;
+    const extraSeatFeesCents = selectedSeatCount * seatFeePerSelectionCents;
+    const grandTotalCents = totalPrice + extraSeatFeesCents;
 
     return (
         <div className="flex flex-col items-center bg-gray-50 min-h-screen pt-8 pb-6 text-gray-700">
@@ -174,16 +314,22 @@ export function ReservationsDetailsPage() {
                             const dobVal = t.passengerDob ?? "";
                             const nameInvalid = !nameVal.trim() || !/^[A-Za-z\s]+$/.test(nameVal.trim());
                             const dobInvalid = !dobVal || isNaN(new Date(dobVal).getTime()) || new Date(dobVal).getTime() > Date.now();
+                            const seat = selectedSeats[t.id] ?? { row: null, letter: null };
+                            const seatFromPicker = seat.letter && seat.row ? `${seat.row}${seat.letter}` : null;
+                            const persistedSeat = t.seat ? String(t.seat).toUpperCase() : null;
+                            const seatLabel = seatFromPicker ?? persistedSeat;
+                            const seatInvalid = (seat.row && !seat.letter) || (!seat.row && seat.letter);
 
                             return (
                                 <div key={t.id} className="border rounded p-4 bg-gray-50">
                                     <div className="flex justify-between items-center mb-2">
                                         <div>
-                                            <p className="text-sm font-medium">Ticket #{t.id} — {t.class}</p>
+                                            <p className="text-sm font-medium">Ticket #{t.id} — {t.class}{seatLabel ? ` — Seat: ${seatLabel} (+25 €)` : ""}</p>
                                             <p className="text-sm text-gray-600">Price: {t.price / 100} €</p>
                                         </div>
                                     </div>
 
+                                    {/* Row 1: Passenger info */}
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         <div>
                                             <label className="block text-xs text-gray-600">Passenger name</label>
@@ -235,6 +381,63 @@ export function ReservationsDetailsPage() {
                                             )}
                                         </div>
                                     </div>
+
+                                    {/* Row 2: Seat and extra bags (optional) */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+                                        <div>
+                                            <label className="block text-xs text-gray-600">Seat (optional)</label>
+                                            <div className="mt-1 flex items-center gap-3">
+                                                <Button
+                                                    onClick={() => openSeatPicker(t.id)}
+                                                    disabled={!canModify || isProcessing}
+                                                    color="bg-blue-600"
+                                                    text={seatLabel ? "Change seat" : "Choose seat"}
+                                                />
+                                                {seatLabel && (
+                                                    <>
+                                                        <span className="text-sm">Selected: <span className="font-medium">{seatLabel}</span></span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => clearSeat(t.id)}
+                                                            className="text-xs text-red-600 underline"
+                                                            disabled={!canModify || isProcessing}
+                                                        >
+                                                            Remove
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                Choosing a seat costs <span className="font-semibold">+25 €</span>. Use the picker to select A–F and 1–31. Selected seat fees are included in the total.
+                                                {isLoadingSeats && (<span className="ml-1">(Loading taken seats...)</span>)}
+                                            </p>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs text-gray-600">Extra bags (optional)</label>
+                                            <input
+                                                type="number"
+                                                min={0}
+                                                max={5}
+                                                value={Number.isFinite((t as any).extraBags) ? (t as any).extraBags : 0}
+                                                onChange={(e) => {
+                                                    const value = Math.max(0, Math.min(5, Number(e.target.value) || 0));
+                                                    updateTicket(t.id, { /* type-cast in setter below */ } as any);
+                                                    if (reservation) {
+                                                        setReservation({
+                                                            ...reservation,
+                                                            tickets: reservation.tickets.map((tk) => tk.id === t.id ? { ...tk, extraBags: value } : tk),
+                                                        });
+                                                    }
+                                                }}
+                                                disabled={!canModify || isProcessing}
+                                                className="mt-1 block w-full border rounded px-2 py-1"
+                                            />
+                                            <p className="text-xs text-gray-500 mt-1">Optional. +30 € per extra bag. Not included in the total shown here.</p>
+                                        </div>
+
+                                        <div className="hidden md:block" />
+                                    </div>
                                 </div>
                             );
                         })}
@@ -243,7 +446,10 @@ export function ReservationsDetailsPage() {
 
                 <div className="flex justify-between items-center">
                     <div>
-                        <p className="text-lg font-semibold">Total: {totalPrice / 100} €</p>
+                        <p className="text-lg font-semibold">Total: {grandTotalCents / 100} €</p>
+                        {selectedSeatCount > 0 && (
+                            <p className="text-xs text-gray-600">Includes seat selection: +{(extraSeatFeesCents / 100).toFixed(2)} € ({selectedSeatCount} × 25 €)</p>
+                        )}
                         {flightHasHappened && <p className="text-sm text-red-600">This flight has already departed — you cannot modify or pay for this reservation.</p>}
                         {!flightHasHappened && reservation.status !== "Reserved" && <p className="text-sm text-gray-600">Reservation is {reservation.status} — actions are disabled.</p>}
                     </div>
@@ -257,13 +463,24 @@ export function ReservationsDetailsPage() {
                         />
                         <Button 
                         onClick={handlePay} 
-                        disabled={!canModify || !allPassengersFilled || isProcessing} 
+                        disabled={!canModify || !allPassengersFilled || !seatSelectionValid || isProcessing} 
                         color="bg-green-600" 
                         text={isProcessing ? "Processing..." : "Pay & Confirm"} 
                         />
                     </div>
                 </div>
             </div>
+
+            <SeatPickerModal
+                isOpen={seatPickerTicketId !== null}
+                onClose={closeSeatPicker}
+                onConfirm={confirmSeatPicker}
+                seatLetters={seatLetters}
+                seatRows={seatRows}
+                value={seatPickerTemp ?? { row: null, letter: null }}
+                setValue={(v) => setSeatPickerTemp(v)}
+                isSeatDisabled={(r, l) => isSeatTaken(r, l, seatPickerTicketId ?? undefined)}
+            />
 
             <ConfirmationModal
                 isOpen={windowOpen}
@@ -275,6 +492,86 @@ export function ReservationsDetailsPage() {
                 message="Are you sure you want to cancel this flight?"
                 isLoading={isProcessing}
             />
+        </div>
+    );
+}
+
+function SeatPickerModal({
+    isOpen,
+    onClose,
+    onConfirm,
+    seatLetters,
+    seatRows,
+    value,
+    setValue,
+    isSeatDisabled,
+}: {
+    isOpen: boolean;
+    onClose: () => void;
+    onConfirm: () => void;
+    seatLetters: string[];
+    seatRows: number[];
+    value: { row: number | null; letter: string | null } | null;
+    setValue: (v: { row: number | null; letter: string | null }) => void;
+    isSeatDisabled?: (row: number, letter: string) => boolean;
+}) {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+            <div className="relative bg-white rounded shadow-lg p-4 w-full max-w-3xl max-h-[80vh] overflow-hidden">
+                <h4 className="text-lg font-semibold mb-2">Choose your seat</h4>
+                <div className="border rounded overflow-auto max-h-[60vh]">
+                    <table className="min-w-full text-sm">
+                        <thead className="sticky top-0 bg-gray-100">
+                            <tr>
+                                <th className="p-2 text-left">Row</th>
+                                {seatLetters.map((l) => (
+                                    <th key={l} className="p-2 text-center">{l}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {seatRows.map((r) => (
+                                <tr key={r} className="odd:bg-white even:bg-gray-50">
+                                    <td className="p-2 font-medium">{r}</td>
+                                    {seatLetters.map((l) => {
+                                        const selected = value?.row === r && value?.letter === l;
+                                        const disabled = isSeatDisabled ? isSeatDisabled(r, l) : false;
+                                        return (
+                                            <td key={l} className="p-1">
+                                                <button
+                                                    type="button"
+                                                    disabled={disabled}
+                                                    onClick={() => !disabled && setValue({ row: r, letter: l })}
+                                                    className={`w-full py-2 rounded border ${disabled ? 'bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed' : selected ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 hover:bg-blue-50 border-gray-300'}`}
+                                                >
+                                                    {r}{l}
+                                                </button>
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+                <div className="mt-3 flex justify-between items-center">
+                    <div className="text-xs text-gray-600">Seat selection costs <span className="font-semibold">+25 €</span>.</div>
+                    <div className="flex gap-2">
+                        <button type="button" className="px-3 py-2 rounded border border-gray-300" onClick={onClose}>Cancel</button>
+                        <button
+                            type="button"
+                            className="px-3 py-2 rounded border border-red-500 text-red-600"
+                            onClick={() => setValue({ row: null, letter: null })}
+                        >
+                            Clear seat
+                        </button>
+                        <button type="button" className="px-3 py-2 rounded bg-blue-600 text-white" onClick={onConfirm}>Confirm</button>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

@@ -87,6 +87,16 @@ class FlightController
         );
     }
 
+    #[Route('/seats/{id}', name: 'flight_get_seats', methods: ['GET'])]
+    public function getSeats(
+        string $id,
+    ): JsonResponse {
+        return new JsonResponse(
+            $this->flightQueryService->getSeats($id),
+            Response::HTTP_OK
+        );
+    }
+
     #[Route('/{id}', name: 'flight_update', methods: ['PUT'])]
     public function update(
         #[MapRequestPayload] FlightUpdateRequest $request,

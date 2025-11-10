@@ -25,6 +25,7 @@ class ReservationInfoNormalizer
                 'class' => $ticket->getSeatClass(),
                 'passengerDob' => $ticket->getPassengerDob()?->format(DATE_ATOM),
                 'price' => $ticket->getPriceFinalCents(),
+                'seat' => $ticket->getSeatNumber(),
             ];
         }
 

@@ -98,7 +98,9 @@ export const confirmAndPay = async (id: string | number, tickets: any[]) => {
         const payload = tickets.map((ticket: any) => ({
             ticketId: ticket.id,
             passengerName: ticket.passengerName,
-            passengerDob: ticket.passengerDob
+            passengerDob: ticket.passengerDob,
+            seat: ticket.seat ?? null,
+            extraBags: Number.isFinite(ticket.extraBags) ? ticket.extraBags : 0,
         }));
 
         const response = await axios.post(`${API_ENDPOINTS.RESERVATIONS.ALL}/${id}/confirm`, payload, {

@@ -17,6 +17,7 @@ use App\Repository\ReservationRepository;
 use App\Repository\TicketRepository;
 use App\Repository\UserRepository;
 use App\Security\UserToken;
+use App\Service\Flight\FlightQueryService;
 use Doctrine\ORM\EntityManagerInterface;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
@@ -25,6 +26,8 @@ use Throwable;
 
 class ReservationComandService
 {
+    private const SEAT_SELECTION_FEE_CENTS = 2500;
+
     public function __construct(
         private readonly FlightRepository $flightRepository,
         private readonly UserRepository $userRepository,
@@ -32,6 +35,7 @@ class ReservationComandService
         private readonly ReservationRepository $reservationRepository,
         private readonly TicketRepository $ticketRepository,
         private readonly PriceProvider $priceProvider,
+        private readonly FlightQueryService $flightQueryService,
     ) {
     }
 
@@ -205,9 +209,18 @@ class ReservationComandService
 
                 $toPayCents += $ticket->getPriceFinalCents();
 
+                if (null !== $request->seat) {
+                    if (in_array($request->seat, $this->flightQueryService->getSeats((string) $reservationId)['takenSeats'], true)) {
+                        throw new LogicException('Seat ' . $request->seat . ' is already taken');
+                    }
+
+                    $toPayCents += self::SEAT_SELECTION_FEE_CENTS;
+                }
+
                 $ticket
                     ->setPassengerName($request->passengerName)
                     ->setPassengerDob($request->passengerDob)
+                    ->setSeatNumber($request->seat)
                 ;
 
                 $this->entityManager->flush();

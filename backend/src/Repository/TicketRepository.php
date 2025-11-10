@@ -19,6 +19,19 @@ class TicketRepository extends ServiceEntityRepository
     /**
      * @return Ticket[]
      */
+    public function findFlightId(int $flightId): array
+    {
+        return $this->createQueryBuilder('t')
+            ->where('t.flight = :flightId')
+            ->setParameter('flightId', $flightId)
+            ->orderBy('t.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return Ticket[]
+     */
     public function findPaidByFlightId(int $flightId): array
     {
         return $this->createQueryBuilder('t')

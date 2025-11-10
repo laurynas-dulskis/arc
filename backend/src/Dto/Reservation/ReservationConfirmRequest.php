@@ -21,4 +21,10 @@ class ReservationConfirmRequest
     #[Assert\Type(DateTimeImmutable::class)]
     #[Assert\LessThan('today', message: 'Passenger date of birth must be in the past.')]
     public ?DateTimeImmutable $passengerDob = null;
+
+    public ?string $seat = null;
+
+    #[Assert\NotBlank]
+    #[Assert\GreaterThanOrEqual(0)]
+    public ?int $extraBags = null;
 }
