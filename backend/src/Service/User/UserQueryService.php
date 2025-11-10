@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\User;
 
+use App\Dto\PageRequest;
 use App\Exception\EntityNotFoundException;
 use App\Normalizer\UserNormalizer;
 use App\Normalizer\UserSignupDetailsNormalizer;
@@ -29,14 +30,21 @@ class UserQueryService
         return $this->userSignupDetailsNormalizer->normalize($user);
     }
 
-    public function getAll(): array
+    public function getAll(PageRequest $request): array
     {
-        $users = $this->userRepository->findAll();
+        $users = $this->userRepository->findAllCustom($request);
 
         return array_map(
             fn ($user) => $this->userNormalizer->normalize($user),
             $users
         );
+    }
+
+    public function getAllPagesCount(): array
+    {
+        return [
+            'pages' => $this->userRepository->findAllCustomPagesCount(),
+        ];
     }
 
     public function getOne(int $userId): array

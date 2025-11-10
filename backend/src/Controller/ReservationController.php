@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Dto\PageRequest;
 use App\Dto\Reservation\ReservationConfirmRequest;
 use App\Dto\Reservation\UserReservationCreateRequest;
 use App\Security\UserToken;
@@ -12,6 +13,7 @@ use App\Service\Reservation\ReservationQueryService;
 use App\Validator\AccessValidator;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -54,10 +56,23 @@ class ReservationController
     }
 
     #[Route('/my', name: 'get_all_my_reservations', methods: ['GET'])]
-    public function getAllMy(UserToken $userToken): JsonResponse
-    {
+    public function getAllMy(
+        #[MapQueryString(validationFailedStatusCode: Response::HTTP_UNPROCESSABLE_ENTITY)]
+        PageRequest $request,
+        UserToken $userToken
+    ): JsonResponse {
         return new JsonResponse(
-            $this->reservationQueryService->getAllMy($userToken),
+            $this->reservationQueryService->getAllMy($userToken, $request),
+            Response::HTTP_OK
+        );
+    }
+
+    #[Route('/my/pages', name: 'get_all_my_reservations_pages', methods: ['GET'])]
+    public function getAllMyPages(
+        UserToken $userToken
+    ): JsonResponse {
+        return new JsonResponse(
+                $this->reservationQueryService->getAllMyPages($userToken),
             Response::HTTP_OK
         );
     }

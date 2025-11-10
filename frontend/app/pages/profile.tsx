@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {getMyHistory} from "~/clients/historyClient";
+import {getMyHistory, getMyHistoryPagesCount} from "~/clients/historyClient";
 import Spinner from "~/components/spinner";
 import UserNavigationHeader from "~/components/userNavigationHeader";
 import {showToast} from "~/utils/toastUtils";
@@ -13,6 +13,8 @@ import Button from "~/components/button";
 export function ProfilePage() {
     const [isFetchingHistory, setIsFetchingHistory] = React.useState(true);
     const [history, setHistory] = React.useState<History[]>([]);
+    const [numberOfPages, setNumberOfPages] = useState(1);
+    const [currentPage, setCurrentPage] = useState(1);
     const [formData, setFormData] = useState({
         email: "",
         firstName: "",
@@ -121,23 +123,45 @@ export function ProfilePage() {
 
 
     React.useEffect(() => {
-        setIsFetchingHistory(true);
+        const bootstrap = async () => {
+            setIsFetchingHistory(true);
+            try {
+                const pages = await getMyHistoryPagesCount();
+                setNumberOfPages(pages || 1);
 
-        getMyHistory()
-            .then((data: History[]) => {
+                const data: History[] = await getMyHistory(1);
                 if (data.length === 0) {
                     showToast("No history found", "info");
                 }
-
                 setHistory(data);
-            })
-            .catch((err) => {
+                setCurrentPage(1);
+            } catch (err) {
                 console.error(err);
-            })
-            .finally(() => {
+                showToast("Failed to load history", "error");
+            } finally {
                 setIsFetchingHistory(false);
-            });
+            }
+        };
+        bootstrap();
     }, []);
+
+    const changePage = async (page: number) => {
+        if (page < 1 || page > numberOfPages) return;
+        setIsFetchingHistory(true);
+        try {
+            const data: History[] = await getMyHistory(page);
+            if (data.length === 0) {
+                showToast("No history found", "info");
+            }
+            setHistory(data);
+            setCurrentPage(page);
+        } catch (err) {
+            console.error(err);
+            showToast("Failed to load history", "error");
+        } finally {
+            setIsFetchingHistory(false);
+        }
+    };
 
     return (
         <div className="flex flex-col items-center bg-gray-50 min-h-screen pt-8 pb-6">
@@ -269,6 +293,25 @@ export function ProfilePage() {
                                                 ))}
                                                 </tbody>
                                             </table>
+                                            <div className="flex justify-between items-center w-full mt-6">
+                                                <button
+                                                    className="px-4 py-2 bg-blue-600 rounded disabled:opacity-50"
+                                                    onClick={() => changePage(currentPage - 1)}
+                                                    disabled={currentPage === 1}
+                                                >
+                                                    Previous
+                                                </button>
+                                                <span className="text-gray-700">
+                                                    Page {currentPage} of {numberOfPages}
+                                                </span>
+                                                <button
+                                                    className="px-4 py-2 bg-blue-600 rounded disabled:opacity-50"
+                                                    onClick={() => changePage(currentPage + 1)}
+                                                    disabled={currentPage === numberOfPages || numberOfPages === 0}
+                                                >
+                                                    Next
+                                                </button>
+                                            </div>
                                         </div>
                                     )}
                                 </>

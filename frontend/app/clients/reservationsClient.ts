@@ -35,13 +35,29 @@ export const reserveSeats = async ({ flightId, economy, business, firstClass }: 
     }
 };
 
-export const getMyReservations = async () => {
+export const getMyReservations = async (page?: number) => {
     try {
-        const response = await axios.get(API_ENDPOINTS.RESERVATIONS.MY, {
-            withCredentials: true
-        });
-    
+        const config: any = { withCredentials: true };
+        if (page && page > 0) {
+            config.params = { page };
+        }
+        const response = await axios.get(API_ENDPOINTS.RESERVATIONS.MY, config);
+
         return response.data;
+    } catch (error) {
+        handleBackendError(error);
+
+        throw error;
+    }
+};
+
+export const getMyReservationsPagesCount = async () => {
+    try {
+        const response = await axios.get(`${API_ENDPOINTS.RESERVATIONS.MY}/pages`, {
+            withCredentials: true,
+        });
+
+        return response.data.pages;
     } catch (error) {
         handleBackendError(error);
 

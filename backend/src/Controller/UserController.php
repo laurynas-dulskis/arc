@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Dto\Flight\FlightFilterRequest;
+use App\Dto\PageRequest;
 use App\Dto\User\UserSignupDetailsRequest;
 use App\Dto\User\UserUpdateRequest;
 use App\Security\UserToken;
@@ -12,6 +14,7 @@ use App\Service\User\UserQueryService;
 use App\Validator\AccessValidator;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -53,12 +56,29 @@ class UserController
     }
 
     #[Route(name: 'get_all', methods: ['GET'])]
-    public function getAll(UserToken $userToken): JsonResponse
+    public function getAll(
+        #[MapQueryString(validationFailedStatusCode: Response::HTTP_UNPROCESSABLE_ENTITY)]
+                            PageRequest $request,
+                            UserToken $userToken
+    ): JsonResponse
     {
         $this->accessValidator->validateIsAdmin($userToken);
 
         return new JsonResponse(
-            $this->userQueryService->getAll(),
+            $this->userQueryService->getAll($request),
+            Response::HTTP_OK
+        );
+    }
+
+    #[Route('/pages', name: 'get_all_pages', methods: ['GET'])]
+    public function getAllPages(
+        UserToken $userToken
+    ): JsonResponse
+    {
+        $this->accessValidator->validateIsAdmin($userToken);
+
+        return new JsonResponse(
+            $this->userQueryService->getAllPagesCount(),
             Response::HTTP_OK
         );
     }

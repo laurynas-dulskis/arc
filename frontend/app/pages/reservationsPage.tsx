@@ -1,7 +1,7 @@
 import React from "react";
 import { generatePath, useNavigate } from "react-router";
 import { getFlightById } from "~/clients/flightsClient";
-import { getMyReservations, reserveSeats } from "~/clients/reservationsClient";
+import { getMyReservations, getMyReservationsPagesCount, reserveSeats } from "~/clients/reservationsClient";
 import Button from "~/components/button";
 import Spinner from "~/components/spinner";
 import UserNavigationHeader from "~/components/userNavigationHeader";
@@ -14,25 +14,49 @@ import { showToast } from "~/utils/toastUtils";
 export function ReservationsPage() {
     const [isFetchingReservations, setIsFetchingReservations] = React.useState(true);
     const [reservations, setReservations] = React.useState<Reservation[]>([]);
+    const [numberOfPages, setNumberOfPages] = React.useState(1);
+    const [currentPage, setCurrentPage] = React.useState(1);
 
     React.useEffect(() => {
-        setIsFetchingReservations(true);
-        
-        getMyReservations()
-            .then((data: Reservation[]) => {
+        const bootstrap = async () => {
+            setIsFetchingReservations(true);
+            try {
+                const pages = await getMyReservationsPagesCount();
+                setNumberOfPages(pages || 1);
+
+                const data: Reservation[] = await getMyReservations(1);
                 if (data.length === 0) {
                     showToast("No reservations found", "info");
                 }
-
                 setReservations(data);
-            })
-            .catch((err) => {
+                setCurrentPage(1);
+            } catch (err) {
                 console.error(err);
-            })
-            .finally(() => {
+                showToast("Failed to load reservations", "error");
+            } finally {
                 setIsFetchingReservations(false);
-            });
+            }
+        };
+        bootstrap();
     }, []);
+
+    const changePage = async (page: number) => {
+        if (page < 1 || page > numberOfPages) return;
+        setIsFetchingReservations(true);
+        try {
+            const data: Reservation[] = await getMyReservations(page);
+            if (data.length === 0) {
+                showToast("No reservations found", "info");
+            }
+            setReservations(data);
+            setCurrentPage(page);
+        } catch (err) {
+            console.error(err);
+            showToast("Failed to load reservations", "error");
+        } finally {
+            setIsFetchingReservations(false);
+        }
+    };
 
     const navigate = useNavigate();
 
@@ -112,6 +136,25 @@ export function ReservationsPage() {
                         ))}
                         </tbody>
                     </table>
+                    <div className="flex justify-between items-center w-full mt-6 px-4 pb-4">
+                        <button
+                            className="px-4 py-2 bg-blue-600 rounded disabled:opacity-50 text-white"
+                            onClick={() => changePage(currentPage - 1)}
+                            disabled={currentPage === 1}
+                        >
+                            Previous
+                        </button>
+                        <span className="text-gray-700">
+                            Page {currentPage} of {numberOfPages}
+                        </span>
+                        <button
+                            className="px-4 py-2 bg-blue-600 rounded disabled:opacity-50 text-white"
+                            onClick={() => changePage(currentPage + 1)}
+                            disabled={currentPage === numberOfPages || numberOfPages === 0}
+                        >
+                            Next
+                        </button>
+                    </div>
                 </div>
             )}
         </div>

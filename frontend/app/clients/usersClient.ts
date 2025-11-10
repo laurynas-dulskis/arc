@@ -30,13 +30,29 @@ export const updateUserInfo = async (userId: string, userData: any) => {
     }
 };
 
-export const adminGetAllUsers = async () => {
+export const adminGetAllUsers = async (page?: number) => {
     try {
-        const response = await axios.get(API_ENDPOINTS.USERS.ALL, {
-            withCredentials: true
-        });
+        const config: any = { withCredentials: true };
+        if (page && page > 0) {
+            config.params = { page };
+        }
+        const response = await axios.get(API_ENDPOINTS.USERS.ALL, config);
 
         return response.data;
+    } catch (error) {
+        handleBackendError(error);
+
+        throw error;
+    }
+};
+
+export const adminGetAllUsersPagesCount = async () => {
+    try {
+        const response = await axios.get(`${API_ENDPOINTS.USERS.ALL}/pages`, {
+            withCredentials: true,
+        });
+
+        return response.data.pages;
     } catch (error) {
         handleBackendError(error);
 

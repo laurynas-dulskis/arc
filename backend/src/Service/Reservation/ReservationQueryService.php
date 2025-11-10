@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\Reservation;
 
+use App\Dto\PageRequest;
 use App\Exception\EntityNotFoundException;
 use App\Normalizer\ReservationInfoNormalizer;
 use App\Normalizer\ReservationNormalizer;
@@ -39,9 +40,9 @@ class ReservationQueryService
         return $data;
     }
 
-    public function getAllMy(UserToken $userToken): array
+    public function getAllMy(UserToken $userToken, PageRequest $request): array
     {
-        $reservations = $this->reservationRepository->findByUserId($userToken->id);
+        $reservations = $this->reservationRepository->findByUserId($userToken->id, $request);
 
         $data = [];
         foreach ($reservations as $reservation) {
@@ -55,6 +56,12 @@ class ReservationQueryService
         }
 
         return $data;
+    }
+
+    public function getAllMyPages(UserToken $userToken){
+        return [
+            'pages' => $this->reservationRepository->findByUserIdPagesCount($userToken->id),
+        ];
     }
 
     public function getInfo(int $reservationId, UserToken $userToken): array

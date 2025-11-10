@@ -4,7 +4,7 @@ import Button from "~/components/button";
 import AdminNavigationHeader from "~/components/adminNavigationHeader";
 import ConfirmationModal from "~/components/confirmationModal";
 import {UserRoles} from "~/constants/userRoles";
-import {adminDeleteUser, adminGetAllUsers, adminUpdateUser} from "~/clients/usersClient";
+import {adminDeleteUser, adminGetAllUsers, adminGetAllUsersPagesCount, adminUpdateUser} from "~/clients/usersClient";
 import {showToast} from "~/utils/toastUtils";
 import Spinner from "~/components/spinner";
 import type {User} from "~/model/user";
@@ -19,26 +19,52 @@ export function Users() {
     const [loading, setLoading] = useState(true);
     const [loadingDelete, setLoadingDelete] = useState(false);
     const [windowOpen, setWindowOpen] = useState(false);
+    const [numberOfPages, setNumberOfPages] = useState(1);
+    const [currentPage, setCurrentPage] = useState(1);
 
 
     React.useEffect(() => {
         setIsAdmin(ensureAdminAccess());
 
-        adminGetAllUsers()
-            .then((data: User[]) => {
+        const bootstrap = async () => {
+            try {
+                const pages = await adminGetAllUsersPagesCount();
+                setNumberOfPages(pages || 1);
+
+                const data: User[] = await adminGetAllUsers(1);
                 if (data.length === 0) {
                     showToast("No users found", "info");
                 }
-
                 setUsers(data);
-            })
-            .catch((err) => {
+                setCurrentPage(1);
+            } catch (err) {
                 console.error(err);
-            })
-            .finally(() => {
+                showToast("Failed to load users", "error");
+            } finally {
                 setLoading(false);
-            });
+            }
+        };
+
+        bootstrap();
     }, []);
+
+    const changePage = async (page: number) => {
+        if (page < 1 || page > numberOfPages) return;
+        setLoading(true);
+        try {
+            const data: User[] = await adminGetAllUsers(page);
+            if (data.length === 0) {
+                showToast("No users found", "info");
+            }
+            setUsers(data);
+            setCurrentPage(page);
+        } catch (err) {
+            console.error(err);
+            showToast("Failed to load users", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const validateUser = (user: User): Partial<Record<keyof User, string>> => {
         const errors: Partial<Record<keyof User, string>> = {};
@@ -121,7 +147,21 @@ export function Users() {
 
         if (deleteIndex !== null) {
             adminDeleteUser(users[deleteIndex].id.toString()).then(() => {
-                setUsers(users.filter((_, i) => i !== deleteIndex));
+                const nextUsers = users.filter((_, i) => i !== deleteIndex);
+                setUsers(nextUsers);
+                adminGetAllUsersPagesCount()
+                    .then((pages) => {
+                        setNumberOfPages(pages || 1);
+                        const targetPage = Math.min(currentPage, pages || 1);
+                        if (nextUsers.length === 0 && targetPage === currentPage && currentPage > 1) {
+                            return changePage(currentPage - 1);
+                        }
+                        if (targetPage !== currentPage) {
+                            return changePage(targetPage);
+                        }
+                        return changePage(currentPage);
+                    })
+                    .catch((e) => console.error(e));
             })
                 .catch((err) => {
                     console.error(err);
@@ -277,6 +317,25 @@ export function Users() {
                         ))}
                         </tbody>
                     </table>
+                    <div className="flex justify-between items-center w-full p-4 border-t">
+                        <button
+                            className="px-4 py-2 bg-blue-600 rounded disabled:opacity-50"
+                            onClick={() => changePage(currentPage - 1)}
+                            disabled={currentPage === 1}
+                        >
+                            Previous
+                        </button>
+                        <span className="text-gray-700">
+                            Page {currentPage} of {numberOfPages}
+                        </span>
+                        <button
+                            className="px-4 py-2 bg-blue-600 rounded disabled:opacity-50"
+                            onClick={() => changePage(currentPage + 1)}
+                            disabled={currentPage === numberOfPages || numberOfPages === 0}
+                        >
+                            Next
+                        </button>
+                    </div>
                 </div>
             )}
 

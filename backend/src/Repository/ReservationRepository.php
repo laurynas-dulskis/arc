@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Dto\PageRequest;
 use App\Entity\Reservation;
 use App\Enum\ReservationStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -19,9 +20,53 @@ class ReservationRepository extends ServiceEntityRepository
     /**
      * @return Reservation[]
      */
-    public function findHistoricByUserId(int $userId): array
+    public function findHistoricByUserId(int $userId, PageRequest $request, int $limit = 3): array
     {
+        $page = 1;
+        if (null !== $request->page) {
+            $page = max(1, $request->page);
+        }
+
+        $offset = ($page - 1) * $limit;
+
         return $this->createQueryBuilder('r')
+            ->where('r.user = :userId')
+            ->andWhere('r.status IN (:statuses)')
+            ->andWhere('r.createdAt > :cutoffDate')
+            ->setFirstResult($offset)
+            ->setParameter('userId', $userId)
+            ->setParameter('statuses', [
+                ReservationStatus::Paid->value,
+            ])
+            ->setParameter('cutoffDate', new \DateTimeImmutable('-5 year'))
+            ->orderBy('r.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findHistoricByUserIdUnlimited(int $userId): array{
+        {
+            return $this->createQueryBuilder('r')
+                ->where('r.user = :userId')
+                ->andWhere('r.status IN (:statuses)')
+                ->andWhere('r.createdAt > :cutoffDate')
+                ->setParameter('userId', $userId)
+                ->setParameter('statuses', [
+                    ReservationStatus::Paid->value,
+                ])
+                ->setParameter('cutoffDate', new \DateTimeImmutable('-5 year'))
+                ->orderBy('r.createdAt', 'DESC')
+                ->getQuery()
+                ->getResult();
+        }
+    }
+
+    public function findHistoricByUserIdPagesCount(int $userId, int $limit = 3): int
+    {
+        return (int) ceil(
+            $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
             ->where('r.user = :userId')
             ->andWhere('r.status IN (:statuses)')
             ->andWhere('r.createdAt > :cutoffDate')
@@ -30,9 +75,9 @@ class ReservationRepository extends ServiceEntityRepository
                 ReservationStatus::Paid->value,
             ])
             ->setParameter('cutoffDate', new \DateTimeImmutable('-5 year'))
-            ->orderBy('r.createdAt', 'DESC')
             ->getQuery()
-            ->getResult();
+            ->getSingleScalarResult() / $limit
+        );
     }
 
     public function findById(string $id): ?Reservation
@@ -45,15 +90,34 @@ class ReservationRepository extends ServiceEntityRepository
         ;
     }
 
-    public function findByUserId(int $userId): array
+    public function findByUserId(int $userId, PageRequest $request, int $limit = 5): array
     {
+        $page = 1;
+        if (null !== $request->page) {
+            $page = max(1, $request->page);
+        }
+
+        $offset = ($page - 1) * $limit;
+
         return $this->createQueryBuilder('r')
             ->where('r.user = :userId')
+            ->setFirstResult($offset)
             ->setParameter('userId', $userId)
             ->orderBy('r.createdAt', 'DESC')
+            ->setMaxResults($limit)
             ->getQuery()
             ->getResult()
         ;
+    }
+
+    public function findByUserIdPagesCount(int $userId, int $limit = 5): int
+    {
+        return (int) ceil($this->createQueryBuilder('r')
+            ->where('r.user = :userId')
+            ->select('COUNT(r.id)')
+            ->setParameter('userId', $userId)
+            ->getQuery()
+                ->getSingleScalarResult() / $limit);
     }
 
     public function findByIdAndUserId(int $reservationId, int $userId): ?Reservation
